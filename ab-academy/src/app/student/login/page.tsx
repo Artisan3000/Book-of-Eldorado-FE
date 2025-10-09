@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function StudentLogin() {
     return (
       <main className="px-8 py-16 font-serif text-black max-w-md mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Student Login</h1>
+        <h1 className="text-6xl font-bold mb-8">Login</h1>
   
         <form className="flex flex-col space-y-6">
           <div>

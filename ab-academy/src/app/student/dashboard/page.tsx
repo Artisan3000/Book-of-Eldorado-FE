@@ -1,13 +1,13 @@
-import CourseList from "@/app/components/CourseList"
-import ProgressTracker from "@/app/components/ProgressTracker"
-import Certificates from "@/app/components/Certificates"
+import CourseList from "@/app/student/dashboard/CourseList"
+import ProgressTracker from "@/app/student/dashboard/ProgressTracker"
+import Certificates from "@/app/student/dashboard/Certificates"
 import MediaLibrary from "@/app/student/dashboard/MediaLibrary"
 import Mentorship from "@/app/student/dashboard/Mentorship"
 
 export default function StudentDashboard() {
   return (
     <main className="px-8 py-16 font-serif text-black">
-      <h1 className="text-3xl mb-12">Dashboard</h1>
+      <h1 className="text-6xl font-bold mb-12">Dashboard</h1>
 
       <section className="mb-16">
         <h2 className="text-xl mb-4 underline">Progress Tracking</h2>

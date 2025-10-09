@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { Instagram, Facebook, Twitter } from "lucide-react"
-import Image from "next/image"
+import Link from "next/link";
+import { Instagram, Facebook, Twitter } from "lucide-react";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -9,32 +9,54 @@ export default function Footer() {
         {/* Left: Logo / Brand */}
         <div className="flex flex-col mr-8">
           <Link href="/">
-            <Image src="/academy-logo.svg" alt="Academy Logo" width={75} height={75} />
+            <Image
+              src="/academy-logo.svg"
+              alt="Academy Logo"
+              width={75}
+              height={75}
+            />
           </Link>
           <p className="text-sm text-gray-600 mt-4">
-            Elevating the craft of barbering with education, mentorship, 
-            and community. Learn at your own pace, anywhere.
+            Elevating the craft of barbering with education, mentorship, and
+            community. Learn at your own pace, anywhere.
           </p>
         </div>
 
         {/* Center: Nav Links */}
         <div className="flex flex-col space-y-2 text-sm">
-            <h3 className="italic font-semibold">Explore</h3>
-          <Link href="/courses" className="hover:underline">Courses</Link>
-          <Link href="/about" className="hover:underline">About</Link>
-          <Link href="/membership" className="hover:underline">Membership</Link>
-          <Link href="/gifts" className="hover:underline">Gifts</Link>
+          <h3 className="italic font-semibold">Explore</h3>
+          <Link href="/about" className="hover:underline">
+            About
+          </Link>
+          <Link href="/courses" className="hover:underline">
+            Courses
+          </Link>
+          <Link href="/membership" className="hover:underline">
+            Membership
+          </Link>
+          <Link href="/gifts" className="hover:underline">
+            Gifts
+          </Link>
         </div>
 
         {/* Center: Nav Links */}
         <div className="flex flex-col space-y-2 text-sm">
           <h3 className="italic font-semibold">Resources</h3>
-          <Link href="/privacy" className="hover:underline">Privacy</Link>
-          <Link href="/terms" className="hover:underline">Terms</Link>
-          <Link href="/support" className="hover:underline">Support</Link>
-          <Link href="/social-impact" className="hover:underline">Social Impact</Link>
-          <Link href="/newsroom" className="hover:underline">Newsroom</Link>
-
+          <Link href="/privacy" className="hover:underline">
+            Privacy
+          </Link>
+          <Link href="/terms" className="hover:underline">
+            Terms
+          </Link>
+          <Link href="/support" className="hover:underline">
+            Support
+          </Link>
+          <Link href="/social-impact" className="hover:underline">
+            Social Impact
+          </Link>
+          <Link href="/newsroom" className="hover:underline">
+            Newsroom
+          </Link>
         </div>
 
         {/* Right: Social / Contact */}
@@ -51,10 +73,11 @@ export default function Footer() {
             </Link>
           </div>
           <p className="text-xs text-gray-500">
-            © {new Date().getFullYear()} Artisan Barber Academy. All rights reserved.
+            © {new Date().getFullYear()} Artisan Barber Academy. All rights
+            reserved.
           </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

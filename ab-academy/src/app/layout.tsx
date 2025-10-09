@@ -19,7 +19,7 @@ export default function RootLayout({
         className={`antialiased`}
       >
         <Navigation />
-        <main>{children}</main>
+        <main> {children}</main>
         <Footer />
       </body>
       
