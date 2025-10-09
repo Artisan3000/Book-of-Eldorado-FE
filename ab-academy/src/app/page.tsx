@@ -13,7 +13,7 @@ export default function Home() {
             mastery, we teach barbering as an art, a skill, and a career.
           </h1>
           <p className="text-3xl font-extrabold mb-12 tracking-tight">
-            Barbering as an art, a skill, and a career.
+            Barbering as an art, a skill, and a career. Hell yeah.
           </p>
           <Link
             href="/courses"
