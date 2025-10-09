@@ -33,6 +33,8 @@ export default function Footer() {
           <Link href="/terms" className="hover:underline">Terms</Link>
           <Link href="/support" className="hover:underline">Support</Link>
           <Link href="/social-impact" className="hover:underline">Social Impact</Link>
+          <Link href="/newsroom" className="hover:underline">Newsroom</Link>
+
         </div>
 
         {/* Right: Social / Contact */}

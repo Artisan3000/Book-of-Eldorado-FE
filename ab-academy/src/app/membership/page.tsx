@@ -7,11 +7,11 @@ export default function MembershipPage() {
   const [isYearly, setIsYearly] = useState(false)
 
   return (
-    <main className="px-8 py-16 font-serif text-black">
+    <main className="px-8 py-16">
       {/* Hero Section */}
       <section className="text-center max-w-3xl mx-auto mb-16">
-        <h1 className="text-4xl font-bold mb-3">The Blueprint Membership</h1>
-        <p className="italic text-lg mb-6 tracking-wide">Build what lasts.</p>
+        <h1 className="text-4xl mb-3">The Blueprint Membership</h1>
+        <p className="italic text-lg mb-6">Build what lasts.</p>
         <p className="text-lg leading-relaxed mb-8">
           A monthly membership for creative entrepreneurs, makers, and professionals
           ready to master the business side of their craft.  
@@ -42,7 +42,7 @@ export default function MembershipPage() {
 
       {/* Pricing Card */}
       <section className="max-w-xl mx-auto border border-black p-8 text-center">
-        <h2 className="text-2xl font-bold mb-4">The Blueprint Membership</h2>
+        <h2 className="text-2xl mb-4">The Blueprint Membership</h2>
         <div className="text-4xl font-bold mb-2">
           ${isYearly ? "2490" : "249"}
         </div>
@@ -72,7 +72,7 @@ export default function MembershipPage() {
 
       {/* Core Pillars */}
       <section className="max-w-5xl mx-auto mt-24 text-center">
-        <h2 className="text-3xl font-bold mb-12">The Three Pillars</h2>
+        <h2 className="text-3xl mb-12">The Three Pillars</h2>
 
         <div className="grid md:grid-cols-3 gap-12 text-left">
           <div className="border border-black p-6">
@@ -105,7 +105,7 @@ export default function MembershipPage() {
 
       {/* CTA */}
       <section className="mt-24 text-center bg-black text-white py-16">
-        <h2 className="text-3xl font-bold mb-6">
+        <h2 className="text-3xl mb-6">
           Build What Lasts.
         </h2>
         <p className="max-w-2xl mx-auto mb-8 text-lg">
