@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --background: #fffff8;
   --foreground: #111;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: 'Newsreader', serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Times New Roman', Times, serif;
+  font-family: var(--font-serif);
 }
