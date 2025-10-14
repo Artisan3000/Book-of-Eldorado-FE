@@ -1,19 +1,23 @@
 "use client";
 import Link from "next/link";
 import { Scissors, Star, Award, Users } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Home() {
-  // Simple intersection observer to trigger scroll reveals
   const sectionsRef = useRef<HTMLDivElement[]>([]);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setVideoLoaded(true), 2500);
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting)
             entry.target.classList.add("animate-fadeUp");
-          }
         });
       },
       { threshold: 0.2 }
@@ -24,29 +28,58 @@ export default function Home() {
   }, []);
 
   const registerSection = (el: HTMLDivElement | null) => {
-    if (el && !sectionsRef.current.includes(el)) {
-      sectionsRef.current.push(el);
-    }
+    if (el && !sectionsRef.current.includes(el)) sectionsRef.current.push(el);
   };
+
+  
 
   return (
     <main>
       {/* Hero Section */}
-      <section className="relative px-8 py-24 border-b border-black text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-xl mb-8 font-light italic leading-relaxed animate-fadeUp">
-            Learn the craft, grow your business, and join a community of barbers
-            building the future of the trade.
-          </h1>
-          <p className="text-3xl font-extrabold mb-12 tracking-tight animate-float">
-            Barbering as an art, a skill, and a career. Hell yeah.
-          </p>
-          <Link
-            href="/courses"
-            className="border border-black bg-black text-white px-6 py-3 text-sm font-medium hover:scale-105 transition-transform duration-300"
-          >
-            Explore Courses
-          </Link>
+      <section className="relative border-b border-black text-center overflow-hidden">
+        <div className="relative w-full h-[80vh] bg-black">
+          {/* ✅ Placeholder Image */}
+          <img
+            src="/hero-placeholder.png"
+            alt="Artisan Barber Academy"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+              videoLoaded ? "opacity-0" : "opacity-100"
+            }`}
+          />
+
+          {/* ✅ Video Layer */}
+          <video
+            key="hero-video"
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+              videoLoaded ? "opacity-100" : "opacity-0"
+            }`}
+            src="/hero-video.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            poster="/hero-placeholder.png"
+            onCanPlay={() => setVideoLoaded(true)}
+            onError={(e) => console.error("Video load error:", e)}
+          />
+
+          {/* ✅ Overlay Text */}
+          <div className="absolute inset-0 bg-white/40 flex flex-col items-center justify-center text-[var(--accent-burgundy)] px-8">
+            <h1 className="text-xl mb-8 font-light italic leading-relaxed animate-fadeUp max-w-3xl">
+              Learn the craft, grow your business, and join a community of
+              barbers building the future of the trade.
+            </h1>
+            <p className="text-3xl font-extrabold mb-12 tracking-tight animate-float">
+              Barbering as an art, a skill, and a career. Hell yeah.
+            </p>
+            <Link
+              href="/courses"
+              className="border border-white bg-white text-black px-6 py-3 text-sm font-medium hover:scale-105 transition-transform duration-300"
+            >
+              Explore Courses
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -56,7 +89,7 @@ export default function Home() {
         className="px-8 py-16 border-b border-black opacity-0"
       >
         <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-extrabold mb-6">Entrepreneur Membership</h2>
+          <h2 className="text-3xl italic mb-6">The Blueprint Membership</h2>
           <p className="text-lg mb-8 max-w-2xl font-light leading-relaxed">
             Designed for barbers who want to go beyond the chair and build a
             business. Learn how to launch, brand, and scale your own barbershop
@@ -120,7 +153,7 @@ export default function Home() {
             <div
               key={course.title}
               style={{ animationDelay: `${i * 0.1}s` }}
-              className={`border border-black p-6 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg opacity-0`}
+              className="border border-black p-6 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg opacity-0"
               ref={registerSection}
             >
               {course.highlight && (
@@ -160,12 +193,14 @@ export default function Home() {
               <div key={i} className="group">
                 <Icon className="w-6 h-6 mx-auto mb-2 transition-transform duration-300 group-hover:scale-110" />
                 <p className="font-medium animate-pulseGlow">
-                  {[
-                    "Access to a supportive learning community",
-                    "Step-by-step video lessons & resources",
-                    "Personalized feedback & mentorship",
-                    "Certificates upon completion",
-                  ][i]}
+                  {
+                    [
+                      "Access to a supportive learning community",
+                      "Step-by-step video lessons & resources",
+                      "Personalized feedback & mentorship",
+                      "Certificates upon completion",
+                    ][i]
+                  }
                 </p>
               </div>
             ))}

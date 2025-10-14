@@ -15,7 +15,7 @@ export default function NewsroomPage() {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
-    <main className="px-8 py-16 font-serif text-black overflow-hidden">
+    <main className="px-8 py-16">
       {/* Hero Section */}
       <section className="text-center max-w-3xl mx-auto mb-20 animate-fadeUp">
         <h1 className="text-6xl font-bold mb-4 tracking-tight">

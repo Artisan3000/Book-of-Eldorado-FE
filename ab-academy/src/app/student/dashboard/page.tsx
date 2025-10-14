@@ -6,10 +6,14 @@ import Mentorship from "@/app/student/dashboard/Mentorship"
 
 export default function StudentDashboard() {
   return (
-    <main className="px-8 py-16 font-serif text-black">
-      <h1 className="text-6xl font-bold mb-12">Dashboard</h1>
+    <main className="px-8 py-16">
+      <h1 className="text-6xl mb-4 animate-fadeUp">Dashboard</h1>
+      <p className="italic text-gray-600 animate-fadeIn">
+      Welcome back — let’s keep your momentum going.
+      </p>
+        
 
-      <section className="mb-16">
+      <section className="mb-16 mt-16 animate-fadeUp">
         <h2 className="text-xl mb-4 underline">Progress Tracking</h2>
         <ProgressTracker />
       </section>
@@ -19,7 +23,7 @@ export default function StudentDashboard() {
         <CourseList />
       </section>
 
-      <section className="mb-16">
+      <section className="mb-16 animate-fadeUp">
         <MediaLibrary />
       </section>
 
@@ -28,7 +32,7 @@ export default function StudentDashboard() {
       </section>
 
       <section>
-        <h2 className="text-xl mb-4 underline">Certificates</h2>
+        <h2 className="text-xl mb-4 underline animate-fadeUp">Certificates</h2>
         <Certificates />
       </section>
     </main>

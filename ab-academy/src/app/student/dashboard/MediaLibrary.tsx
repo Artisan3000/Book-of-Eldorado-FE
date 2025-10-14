@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Book, FileText, Video, Headphones } from "lucide-react";
 import React from "react";
 
@@ -42,13 +43,36 @@ export default function MediaLibrary() {
     Audio: <Headphones className="w-5 h-5" />,
   };
 
+  const [visibleItems, setVisibleItems] = useState<number[]>([]);
+
+  useEffect(() => {
+    mediaItems.forEach((_, index) => {
+      const timeout = setTimeout(() => {
+        setVisibleItems((prev) => [...prev, index]);
+      }, index * 180); // stagger interval
+      return () => clearTimeout(timeout);
+    });
+  }, []);
+
   return (
-    <section className="border border-black p-8 mb-12">
-      <h2 className="text-xl mb-4 underline">Media Library</h2>
+    <section className="border border-black p-8 mb-12 relative z-10">
+      <h2 className="text-xl mb-6 underline decoration-[var(--accent-burgundy)] underline-offset-4">
+        Media Library
+      </h2>
 
       <div className="grid md:grid-cols-4 gap-6">
-        {mediaItems.map((item) => (
-          <div key={item.id} className="border border-black p-4 flex flex-col">
+        {mediaItems.map((item, index) => (
+          <div
+            key={item.id}
+            className={`border border-black p-4 flex flex-col transition-all duration-700 ease-out ${
+              visibleItems.includes(index)
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+            style={{
+              transitionDelay: `${index * 120}ms`,
+            }}
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="flex items-center gap-2 font-semibold">
                 {icons[item.type]} {item.type}
@@ -57,9 +81,11 @@ export default function MediaLibrary() {
                 {item.fileSize || item.duration}
               </span>
             </div>
+
             <h3 className="text-lg font-bold mb-1">{item.title}</h3>
             <p className="text-sm text-gray-800 mb-2">{item.description}</p>
-            <button className="mt-auto border border-black px-3 py-1 text-xs uppercase tracking-wide hover:bg-gray-100">
+
+            <button className="mt-auto border border-black px-3 py-1 text-xs uppercase tracking-wide hover:bg-gray-100 transition-all duration-200 active:scale-95">
               View
             </button>
           </div>

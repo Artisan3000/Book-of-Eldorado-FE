@@ -5,7 +5,7 @@ import { Gift, Scissors, Star, Award, Users } from "lucide-react";
 
 export default function GiftsPage() {
   return (
-    <main className="px-8 py-16 font-serif text-black overflow-hidden">
+    <main className="px-8 py-16 overflow-hidden">
       {/* Hero / Banner */}
       <section className="relative text-center mb-20 animate-fadeUp">
         <h1 className="text-6xl font-bold mb-4">Give the Gift of Mastery</h1>

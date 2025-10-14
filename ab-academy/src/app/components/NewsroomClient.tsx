@@ -44,7 +44,7 @@ export default function NewsroomClient({ articles }: { articles: NewsItem[] }) {
   return (
     <>
       {/* Filter Bar */}
-      <section className="text-center max-w-3xl mx-auto mb-12 animate-fadeUp">
+      <section className="sticky top-4 z-50 text-center max-w-3xl mx-auto mb-12 animate-fadeUp bg-[var(--background)]">
         <div className="flex flex-wrap justify-center gap-3 border-t border-b border-black py-4">
           {categories.map((cat) => (
             <button
