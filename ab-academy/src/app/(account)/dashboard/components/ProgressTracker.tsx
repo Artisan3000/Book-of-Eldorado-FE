@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ProgressTracker() {
-  const progress = [
-    { course: "Beginner Barbering", completed: 6, total: 12 },
-    { course: "Advanced Barbering", completed: 3, total: 18 },
-  ];
+  
+  const progress = useMemo(
+    () => [
+      { course: "Beginner Barbering", completed: 6, total: 12 },
+      { course: "Advanced Barbering", completed: 3, total: 18 },
+    ],
+    []
+  );
 
   const [animatedWidths, setAnimatedWidths] = useState<number[]>([]);
 
@@ -15,7 +19,7 @@ export default function ProgressTracker() {
       setAnimatedWidths(progress.map((p) => (p.completed / p.total) * 100));
     }, 200);
     return () => clearTimeout(timeout);
-  }, []);
+  }, [progress]);
 
   return (
     <div className="space-y-6 animate-fadeIn">

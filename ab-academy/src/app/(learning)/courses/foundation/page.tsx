@@ -8,7 +8,7 @@ export default function RefinementCoursePage() {
   const [activeTab, setActiveTab] = useState("About");
 
   return (
-    <main className="font-serif text-black">
+    <main>
       {/* Hero */}
       <section className="grid md:grid-cols-2 gap-8 px-8 py-16 border-b border-black animate-fadeUp">
         <div className="space-y-6">

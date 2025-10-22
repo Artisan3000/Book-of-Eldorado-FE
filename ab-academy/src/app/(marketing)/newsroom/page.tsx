@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import NewsroomClient from "../components/NewsroomClient";
+import NewsroomClient from "@/app/components/NewsroomClient";
 
 export default function NewsroomPage() {
   const newsroomDir = path.join(process.cwd(), "public/newsroom");

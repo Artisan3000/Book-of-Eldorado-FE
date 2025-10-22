@@ -13,16 +13,18 @@ export default function MembershipPage() {
     const end = isYearly ? 2490 : 249;
     const duration = 400;
     const startTime = performance.now();
-
+  
     const step = (currentTime: number) => {
       const progress = Math.min((currentTime - startTime) / duration, 1);
       const value = Math.floor(start + (end - start) * progress);
       setDisplayPrice(value);
       if (progress < 1) requestAnimationFrame(step);
     };
-
+  
     requestAnimationFrame(step);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isYearly]);
+  
 
   return (
     <main className="px-8 py-16 font-serif text-black overflow-hidden">
@@ -31,11 +33,12 @@ export default function MembershipPage() {
         <h1 className="text-6xl font-bold mb-3">The Blueprint Membership</h1>
         <p className="italic text-lg mb-6 text-gray-700">Build what lasts.</p>
         <p className="text-lg leading-relaxed mb-8 animate-fadeIn delay-150">
-          A monthly membership for creative entrepreneurs, makers, and professionals
-          ready to master the business side of their craft.  
-          Born from the spirit of the barbershop — where skill, independence, and
-          community intersect — <strong>The Blueprint Membership</strong> teaches you
-          how to turn creativity into structure and passion into profit.
+          A monthly membership for creative entrepreneurs, makers, and
+          professionals ready to master the business side of their craft. Born
+          from the spirit of the barbershop — where skill, independence, and
+          community intersect — <strong>The Blueprint Membership</strong>{" "}
+          teaches you how to turn creativity into structure and passion into
+          profit.
         </p>
       </section>
 
@@ -86,7 +89,10 @@ export default function MembershipPage() {
             <li
               key={item}
               className="flex items-start gap-2 opacity-0 animate-fadeUp"
-              style={{ animationDelay: `${i * 150}ms`, animationFillMode: "forwards" }}
+              style={{
+                animationDelay: `${i * 150}ms`,
+                animationFillMode: "forwards",
+              }}
             >
               <Check className="w-4 h-4 mt-1 text-black" />
               <span className="text-sm">{item}</span>
@@ -139,9 +145,9 @@ export default function MembershipPage() {
           Build What Lasts.
         </h2>
         <p className="max-w-2xl mx-auto mb-8 text-lg font-light leading-relaxed">
-          Whether you’re behind the chair, behind a brand, or behind a vision — The
-          Blueprint gives you the foundation, structure, and support to grow with
-          purpose.
+          Whether you’re behind the chair, behind a brand, or behind a vision —
+          The Blueprint gives you the foundation, structure, and support to grow
+          with purpose.
         </p>
         <button className="border border-white bg-white text-black px-6 py-3 text-sm font-medium transition-transform duration-300 hover:scale-105 hover:bg-gray-200">
           Join The Blueprint
@@ -169,7 +175,10 @@ export default function MembershipPage() {
             <div
               key={faq.q}
               className="border-l-2 border-black pl-4 animate-fadeUp"
-              style={{ animationDelay: `${i * 200}ms`, animationFillMode: "forwards" }}
+              style={{
+                animationDelay: `${i * 200}ms`,
+                animationFillMode: "forwards",
+              }}
             >
               <h3 className="font-bold mb-2">{faq.q}</h3>
               <p>{faq.a}</p>
