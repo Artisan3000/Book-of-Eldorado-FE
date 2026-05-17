@@ -1,19 +1,9 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useUser } from "@/app/providers/UserProvider";
-import { useRouter } from "next/navigation";
+import type { AppUser } from "@/lib/user";
+import LogoutButton from "./LogoutButton";
 
-export default function Navigation() {
-  const { user, logout } = useUser();
-  const router = useRouter();
-
-  function handleLogout() {
-    logout();
-    router.push("/"); // redirect to home
-  }
-
+export default function Navigation({ user }: { user: AppUser | null }) {
   return (
     <nav className="flex items-center justify-between border-b border-black px-8 py-4">
       {/* Logo / Title */}
@@ -55,7 +45,7 @@ export default function Navigation() {
               Log In
             </Link>
             <Link
-              href="/signup"
+              href="/enroll"
               className="border border-black bg-black text-white px-4 py-2 text-sm font-medium hover:bg-gray-900"
             >
               Sign Up
@@ -70,12 +60,7 @@ export default function Navigation() {
               Dashboard
             </Link>
 
-            <button
-              onClick={handleLogout}
-              className="border border-black px-4 py-2 text-sm font-medium bg-white hover:bg-gray-100 transition"
-            >
-              Log Out
-            </button>
+            <LogoutButton />
           </>
         )}
       </div>

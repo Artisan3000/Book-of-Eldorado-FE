@@ -1,37 +1,64 @@
-"use client";
-
-import { useEffect, useRef } from "react";
 import { Scissors, Star, Award, Check } from "lucide-react";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import Reveal from "@/app/components/Reveal";
+import {
+  formatCoursePrice,
+  getPublishedCourses,
+  type PublishedCourse,
+} from "@/lib/data/courses";
 
-export default function CoursesOverview() {
-  const sectionRefs = useRef<HTMLDivElement[]>([]);
+type CoursePresentation = {
+  icon: ReactNode;
+  features: string[];
+  badge?: string;
+  dark?: boolean;
+};
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) entry.target.classList.add("animate-fadeUp");
-        });
-      },
-      { threshold: 0.15 }
-    );
+const coursePresentation: Record<string, CoursePresentation> = {
+  foundation: {
+    icon: <Scissors className="w-6 h-6" />,
+    features: [
+      "Tool fundamentals & safety",
+      "Clipper basics & classic fades",
+      "Beard grooming essentials",
+      "Client care & hygiene",
+      "Portfolio starter guidance",
+    ],
+  },
+  refinement: {
+    icon: <Star className="w-6 h-6" />,
+    badge: "Most Popular",
+    dark: true,
+    features: [
+      "Skin fades & precision blending",
+      "Advanced scissor-over-comb",
+      "Razor detailing & line artistry",
+      "Business & branding essentials",
+      "Mentorship & peer support",
+    ],
+  },
+  mastery: {
+    icon: <Award className="w-6 h-6" />,
+    features: [
+      "Signature detailing & creative fades",
+      "Brand storytelling & client experience",
+      "Mentorship & apprenticeship transition",
+      "Portfolio & presentation mastery",
+      "Certification as an Artisan Master Barber",
+    ],
+  },
+};
 
-    sectionRefs.current.forEach((el) => el && observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+export const dynamic = "force-dynamic";
 
-  const registerSection = (el: HTMLDivElement | null) => {
-    if (el && !sectionRefs.current.includes(el)) sectionRefs.current.push(el);
-  };
+export default async function CoursesOverview() {
+  const courses = await getPublishedCourses();
 
   return (
     <main className="px-8 py-16 font-serif text-black overflow-hidden">
       {/* Hero */}
-      <section
-        ref={registerSection}
-        className="max-w-4xl mx-auto text-center mb-16 opacity-0"
-      >
+      <Reveal className="max-w-4xl mx-auto text-center mb-16 opacity-0">
         <h1 className="text-6xl font-bold mb-4">The Artisan Progression</h1>
         <p className="text-lg mb-8 leading-relaxed">
           A three-part journey designed to transform beginners into confident professionals.
@@ -45,72 +72,31 @@ export default function CoursesOverview() {
         >
           Join the Academy
         </Link>
-      </section>
+      </Reveal>
 
       {/* Course Comparison Grid */}
-      <div
-        ref={registerSection}
-        className="grid md:grid-cols-3 gap-8 mb-16 opacity-0"
-      >
-        {/* Foundation */}
-        <CourseCard
-          title="Foundation"
-          icon={<Scissors className="w-6 h-6" />}
-          description="Learn the craft. Build your confidence. Get grounded in the essentials of barbering — from tool handling and cutting techniques to fades and client service."
-          price="$749"
-          duration="8 weeks (self-paced)"
-          link="/courses/foundation"
-          features={[
-            "Tool fundamentals & safety",
-            "Clipper basics & classic fades",
-            "Beard grooming essentials",
-            "Client care & hygiene",
-            "Portfolio starter guidance",
-          ]}
-        />
+      <Reveal className="grid md:grid-cols-3 gap-8 mb-16 opacity-0">
+        {courses.map((course) => {
+          const presentation = coursePresentation[course.slug] || {
+            icon: <Scissors className="w-6 h-6" />,
+            features: [],
+          };
 
-        {/* Refinement */}
-        <CourseCard
-          title="Refinement"
-          icon={<Star className="w-6 h-6" />}
-          badge="Most Popular"
-          description="Sharpen your eye. Strengthen your flow. Take your skills to the next level with advanced techniques, styling precision, and workflow discipline."
-          price="$1249"
-          duration="12 weeks (self-paced)"
-          link="/courses/refinement"
-          dark
-          features={[
-            "Skin fades & precision blending",
-            "Advanced scissor-over-comb",
-            "Razor detailing & line artistry",
-            "Business & branding essentials",
-            "Mentorship & peer support",
-          ]}
-        />
-
-        {/* Mastery */}
-        <CourseCard
-          title="Mastery"
-          icon={<Award className="w-6 h-6" />}
-          description="Define your style. Lead with excellence. Develop your personal artistry and professional identity. Learn the nuances that separate good barbers from great ones."
-          price="$899"
-          duration="16 weeks (self-paced)"
-          link="/courses/mastery"
-          features={[
-            "Signature detailing & creative fades",
-            "Brand storytelling & client experience",
-            "Mentorship & apprenticeship transition",
-            "Portfolio & presentation mastery",
-            "Certification as an Artisan Master Barber",
-          ]}
-        />
-      </div>
+          return (
+            <CourseCard
+              key={course.id}
+              course={course}
+              icon={presentation.icon}
+              badge={presentation.badge}
+              dark={presentation.dark}
+              features={presentation.features}
+            />
+          );
+        })}
+      </Reveal>
 
       {/* CTA Section */}
-      <section
-        ref={registerSection}
-        className="text-center bg-black text-white py-16 mb-16 opacity-0"
-      >
+      <Reveal className="text-center bg-black text-white py-16 mb-16 opacity-0">
         <h2 className="text-3xl font-bold mb-4 animate-fadeUp">Start Your Journey Today</h2>
         <p className="max-w-2xl mx-auto mb-8 text-lg font-light leading-relaxed">
           Every great barber starts somewhere. Choose your path — whether you’re laying the foundation,
@@ -122,13 +108,10 @@ export default function CoursesOverview() {
         >
           Join the Academy
         </Link>
-      </section>
+      </Reveal>
 
       {/* FAQ */}
-      <section
-        ref={registerSection}
-        className="max-w-3xl mx-auto opacity-0"
-      >
+      <Reveal className="max-w-3xl mx-auto opacity-0">
         <h2 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h2>
         <div className="space-y-6 text-sm leading-relaxed">
           <FaqItem
@@ -148,7 +131,7 @@ export default function CoursesOverview() {
             answer="Absolutely. Start at your current level and progress at your own pace. You can upgrade anytime by paying only the difference between courses."
           />
         </div>
-      </section>
+      </Reveal>
     </main>
   );
 }
@@ -158,23 +141,15 @@ export default function CoursesOverview() {
 ==================== */
 
 function CourseCard({
-  title,
-  description,
-  price,
-  duration,
-  link,
+  course,
   features,
   icon,
   badge,
   dark,
 }: {
-  title: string;
-  description: string;
-  price: string;
-  duration: string;
-  link: string;
+  course: PublishedCourse;
   features: string[];
-  icon: React.ReactNode;
+  icon: ReactNode;
   badge?: string;
   dark?: boolean;
 }) {
@@ -193,11 +168,13 @@ function CourseCard({
       )}
       <div className="flex items-center justify-between mb-4">
         {icon}
-        <h2 className="text-2xl font-bold">{title}</h2>
+        <h2 className="text-2xl font-bold">{course.title}</h2>
       </div>
-      <p className="mb-4 text-sm">{description}</p>
-      <div className="text-3xl font-bold mb-2">{price}</div>
-      <p className="text-sm mb-6">{duration}</p>
+      <p className="mb-4 text-sm">{course.description}</p>
+      <div className="text-3xl font-bold mb-2">
+        {formatCoursePrice(course.priceCents)}
+      </div>
+      <p className="text-sm mb-6">{course.duration}</p>
 
       <ul className="space-y-3 flex-1">
         {features.map((item) => (
@@ -209,14 +186,14 @@ function CourseCard({
       </ul>
 
       <Link
-        href={link}
+        href={`/courses/${course.slug}`}
         className={`mt-8 py-3 border border-black text-sm font-medium text-center transition-colors duration-300 ${
           dark
             ? "bg-black text-white hover:bg-gray-900"
             : "hover:bg-gray-100 text-black"
         }`}
       >
-        Enroll in {title}
+        Enroll in {course.title}
       </Link>
     </div>
   );

@@ -1,23 +1,20 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
+import Tabs from "@/app/components/Tabs";
+import { getRequiredCourseBySlug } from "@/lib/data/courses";
 
-export default function RefinementCoursePage() {
-  const tabs = ["About", "Outcomes", "Courses", "Testimonials"];
-  const [activeTab, setActiveTab] = useState("About");
+export const dynamic = "force-dynamic";
+
+export default async function RefinementCoursePage() {
+  const course = await getRequiredCourseBySlug("refinement");
 
   return (
     <main className="font-serif text-black">
       {/* Hero */}
       <section className="grid md:grid-cols-2 gap-8 px-8 py-16 border-b border-black animate-fadeUp">
         <div className="space-y-6">
-          <h1 className="text-6xl font-bold leading-tight">Refinement</h1>
+          <h1 className="text-6xl font-bold leading-tight">{course.title}</h1>
           <p className="text-lg leading-relaxed">
-            Sharpen your eye. Strengthen your flow. Take your skills to the next
-            level with advanced techniques, styling precision, and workflow
-            discipline. This stage focuses on consistency, efficiency, and
-            building your creative rhythm.
+            {course.description}
           </p>
           <button className="bg-black text-white px-6 py-3 font-medium uppercase tracking-wide transition-transform duration-300 hover:scale-105 active:scale-95">
             Enroll Now
@@ -34,30 +31,11 @@ export default function RefinementCoursePage() {
         </div>
       </section>
 
-      {/* Tabs */}
-      <nav className="flex border-b border-black text-sm uppercase tracking-wide">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`relative px-6 py-3 border-r border-black last:border-r-0 transition-colors duration-300 ${
-              activeTab === tab
-                ? "bg-black text-white"
-                : "hover:bg-gray-100 hover:text-gray-800"
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <span className="absolute bottom-0 left-0 w-full h-0.5 animate-underline" />
-            )}
-          </button>
-        ))}
-      </nav>
-
-      {/* Tab Content */}
-      <section className="px-8 py-12 max-w-3xl mx-auto min-h-[300px] transition-all duration-500">
-        <div key={activeTab} className="animate-fadeIn">
-          {activeTab === "About" && (
+      <Tabs
+        tabs={[
+          {
+            label: "About",
+            content: (
             <>
               <h2 className="text-2xl font-bold mb-4">About This Course</h2>
               <p className="text-lg leading-relaxed">
@@ -67,9 +45,11 @@ export default function RefinementCoursePage() {
                 building.
               </p>
             </>
-          )}
-
-          {activeTab === "Outcomes" && (
+            ),
+          },
+          {
+            label: "Outcomes",
+            content: (
             <>
               <h2 className="text-2xl font-bold mb-4">What You’ll Achieve</h2>
               <ul className="list-disc list-inside space-y-2 leading-relaxed">
@@ -82,25 +62,29 @@ export default function RefinementCoursePage() {
                 </li>
               </ul>
             </>
-          )}
-
-          {activeTab === "Courses" && (
+            ),
+          },
+          {
+            label: "Courses",
+            content: (
             <>
               <h2 className="text-2xl font-bold mb-4">Course Breakdown</h2>
               <ol className="list-decimal list-inside space-y-2 leading-relaxed">
-                <li>Advanced Clipper Techniques (8 hrs)</li>
-                <li>Scissor-Over-Comb Mastery (10 hrs)</li>
-                <li>Advanced Fades & Tapers (12 hrs)</li>
-                <li>Razor Design & Detailing (8 hrs)</li>
-                <li>Styling for All Hair Types (8 hrs)</li>
-                <li>Portfolio Building & Photography (6 hrs)</li>
-                <li>Business & Shop Management (10 hrs)</li>
-                <li>Capstone: Signature Style Project (15 hrs)</li>
+                {course.modules.flatMap((module) =>
+                  module.lessons.map((lesson) => (
+                    <li key={lesson.id}>
+                      {lesson.title}
+                      {lesson.duration ? ` (${lesson.duration})` : ""}
+                    </li>
+                  ))
+                )}
               </ol>
             </>
-          )}
-
-          {activeTab === "Testimonials" && (
+            ),
+          },
+          {
+            label: "Testimonials",
+            content: (
             <>
               <h2 className="text-2xl font-bold mb-4">Student Testimonials</h2>
               <blockquote className="italic mb-4 border-l-4 border-black pl-4 text-gray-700">
@@ -118,9 +102,10 @@ export default function RefinementCoursePage() {
                 </span>
               </blockquote>
             </>
-          )}
-        </div>
-      </section>
+            ),
+          },
+        ]}
+      />
     </main>
   );
 }

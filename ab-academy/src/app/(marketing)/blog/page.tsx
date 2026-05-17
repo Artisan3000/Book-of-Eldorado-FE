@@ -1,6 +1,4 @@
-"use client";
 import Link from "next/link";
-import { useState } from "react"; // ✅ remove useEffect since unused
 
 interface Post {
   id: number;
@@ -13,7 +11,7 @@ interface Post {
 
 export default function BlogPage() {
   // Mock data for now — backend will replace this
-  const [posts] = useState<Post[]>([
+  const posts: Post[] = [
     {
       id: 1,
       title: "Building a Modern Barbering Curriculum",
@@ -30,7 +28,7 @@ export default function BlogPage() {
       author: "Team Artisan",
       date: "2025-09-22",
     },
-  ]);
+  ];
 
   return (
     <main className="px-8 py-16 font-serif text-black">

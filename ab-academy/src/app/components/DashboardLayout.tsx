@@ -1,9 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
-import Link from "next/link";
-import { LogOut, Home } from "lucide-react";
-import { useUser } from "@/app/providers/UserProvider";
+import type { AppUser } from "@/lib/user";
 
 interface DashboardLayoutProps {
   title: string;
@@ -12,18 +10,18 @@ interface DashboardLayoutProps {
   tabs?: string[];
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  user?: AppUser | null;
 }
 
 export default function DashboardLayout({
   title,
   subtitle,
   children,
-  tabs,
+  tabs = [],
   activeTab,
   onTabChange,
+  user,
 }: DashboardLayoutProps) {
-  const { user, logout } = useUser();
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -42,42 +40,32 @@ export default function DashboardLayout({
               </span>
             )}
           </span>
-
-          <Link
-            href="/"
-            className="flex items-center gap-1 border border-black px-2 py-1 text-xs hover:bg-gray-100 transition"
-          >
-            <Home className="w-4 h-4" /> Home
-          </Link>
-
-          <button
-            onClick={logout}
-            className="flex items-center gap-1 border border-black px-2 py-1 text-xs hover:bg-gray-100 transition"
-          >
-            <LogOut className="w-4 h-4" /> Logout
-          </button>
         </div>
       </header>
 
       {/* Tabs (if provided) */}
-      {tabs && (
+      {tabs.length > 0 && (
         <nav className="flex border-b border-black text-sm uppercase">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => onTabChange && onTabChange(tab)}
-              className={`relative px-6 py-3 border-r border-black last:border-r-0 transition-colors duration-300 ${
-                activeTab === tab
-                  ? "bg-black text-white"
-                  : "hover:bg-gray-100 hover:text-gray-800"
-              }`}
-            >
-              {tab}
-              {activeTab === tab && (
-                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[var(--accent-yellow)]" />
-              )}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const isActive = activeTab?.toLowerCase() === tab.toLowerCase();
+
+            return (
+              <button
+                key={tab}
+                onClick={() => onTabChange?.(tab)}
+                className={`relative px-6 py-3 border-r border-black last:border-r-0 transition-colors duration-300 ${
+                  isActive
+                    ? "bg-black text-white"
+                    : "hover:bg-gray-100 hover:text-gray-800"
+                }`}
+              >
+                {tab}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 bg-yellow-400" />
+                )}
+              </button>
+            );
+          })}
         </nav>
       )}
 

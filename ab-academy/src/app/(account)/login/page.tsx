@@ -3,18 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/app/providers/UserProvider";
 import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { setUser } = useUser();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  type UserRole = "admin" | "instructor" | "student" | "blueprint_member";
-  const [role, setRole] = useState<UserRole>("student");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -25,22 +20,23 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Temporary mock user object for testing
-      const mockUser = {
-        id: Date.now(),
-        name: "Johnny Appleseed",
-        email: email || "johnny@artisanbarber.com",
-        role,
-      };
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 700));
+      const data = await response.json();
 
-      // Save to context
-      setUser(mockUser);
+      if (!response.ok) {
+        setError(data.error || "Invalid email or password.");
+        return;
+      }
 
-      // Redirect to unified dashboard
-      router.push("/dashboard");
+      router.push(data.redirectTo || "/dashboard");
+      router.refresh();
     } catch {
       setError("Something went wrong.");
     } finally {
@@ -79,24 +75,6 @@ export default function LoginPage() {
             className="mt-2 block w-full border border-black px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
             placeholder="••••••••"
           />
-        </div>
-
-        {/* Temporary Role Selector */}
-        <div>
-          <label htmlFor="role" className="block text-sm font-medium">
-            Login As
-          </label>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value as UserRole)}
-            className="mt-2 block w-full border border-black px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black"
-          >
-            <option value="admin">Admin</option>
-            <option value="instructor">Instructor</option>
-            <option value="student">Student</option>
-            <option value="blueprint_member">Blueprint Member</option>
-          </select>
         </div>
 
         {error && (

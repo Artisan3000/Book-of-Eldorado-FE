@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import { Gift, Scissors, Star, Award, Users } from "lucide-react";
 
