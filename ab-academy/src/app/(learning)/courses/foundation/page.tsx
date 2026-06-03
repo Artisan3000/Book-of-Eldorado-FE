@@ -1,11 +1,14 @@
 import Image from "next/image";
+import Link from "next/link";
 import Tabs from "@/app/components/Tabs";
+import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { getRequiredCourseBySlug } from "@/lib/data/courses";
 
 export const dynamic = "force-dynamic";
 
 export default async function FoundationCoursePage() {
   const course = await getRequiredCourseBySlug("foundation");
+  const modules = getVisibleCourseModules(course.slug, course.modules);
 
   return (
     <main>
@@ -16,14 +19,17 @@ export default async function FoundationCoursePage() {
           <p className="text-lg leading-relaxed">
             {course.description}
           </p>
-          <button className="bg-black text-white px-6 py-3 font-medium uppercase tracking-wide transition-transform duration-300 hover:scale-105 active:scale-95">
+          <Link
+            href="/enroll"
+            className="inline-block bg-black text-white px-6 py-3 font-medium uppercase tracking-wide transition-transform duration-300 hover:scale-105 active:scale-95"
+          >
             Enroll Now
-          </button>
+          </Link>
         </div>
         <div className="relative w-full h-80 overflow-hidden rounded-lg">
           <Image
-            src="/refinement-barber.jpg"
-            alt="Refinement Barbering"
+            src="/sinval-carvalho-WbEibGKHBMY-unsplash.jpg"
+            alt="Foundation course workspace"
             fill
             className="object-cover transform transition-transform duration-[4000ms] hover:scale-110"
             priority
@@ -39,11 +45,10 @@ export default async function FoundationCoursePage() {
             <>
               <h2 className="text-2xl font-bold mb-4">About This Course</h2>
               <p className="text-lg leading-relaxed">
-                Designed for barbers ready to refine their craft, this course
-                dives deeper into advanced cutting methods, precision styling,
-                and professional workflow systems. You’ll learn how to deliver
-                polished results efficiently while developing your personal
-                rhythm behind the chair.
+                Foundation introduces the client, communication, and business
+                practices that support a sustainable barbering career. These
+                modules are scaffolded for short video lessons, workbook
+                exercises, and practical reflection prompts.
               </p>
             </>
             ),
@@ -54,46 +59,57 @@ export default async function FoundationCoursePage() {
             <>
               <h2 className="text-2xl font-bold mb-4">What You’ll Achieve</h2>
               <ul className="list-disc list-inside space-y-2 leading-relaxed">
-                <li>Execute advanced fades and precision blends</li>
-                <li>Enhance scissor-over-comb technique</li>
-                <li>Refine razor line artistry and detailing</li>
-                <li>Improve time management and consistency</li>
-                <li>Develop an efficient, creative workflow</li>
+                <li>Practice clear client consultation habits</li>
+                <li>Understand follow-up and retention foundations</li>
+                <li>Begin shaping a simple barber brand position</li>
+                <li>Outline service menu and client experience basics</li>
+                <li>Use workbook prompts to prepare for deeper coursework</li>
               </ul>
             </>
             ),
           },
           {
-            label: "Courses",
+            label: "Modules",
             content: (
             <>
-              <h2 className="text-2xl font-bold mb-4">Course Breakdown</h2>
-              <ol className="list-decimal list-inside space-y-2 leading-relaxed">
-                {course.modules.flatMap((module) =>
-                  module.lessons.map((lesson) => (
-                    <li key={lesson.id}>
-                      {lesson.title}
-                      {lesson.duration ? ` (${lesson.duration})` : ""}
-                    </li>
-                  ))
-                )}
-              </ol>
+              <h2 className="text-2xl font-bold mb-4">Module Scaffold</h2>
+              <div className="space-y-6">
+                {modules.map((module) => (
+                  <section key={module.id} className="border border-black p-5">
+                    <h3 className="text-xl font-bold mb-2">{module.title}</h3>
+                    {module.description && (
+                      <p className="text-sm text-gray-700 mb-4">
+                        {module.description}
+                      </p>
+                    )}
+                    <ol className="list-decimal list-inside space-y-2 leading-relaxed">
+                      {module.lessons.map((lesson) => (
+                        <li key={lesson.id}>
+                          {lesson.title}
+                          {lesson.duration ? ` (${lesson.duration})` : ""}
+                          {lesson.description && (
+                            <p className="ml-6 text-sm text-gray-600">
+                              {lesson.description}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                ))}
+              </div>
             </>
             ),
           },
           {
-            label: "Testimonials",
+            label: "Workbook",
             content: (
             <>
-              <h2 className="text-2xl font-bold mb-4">Student Testimonials</h2>
-              <blockquote className="italic mb-4 border-l-4 border-black pl-4 text-gray-700">
-                “This course helped me find my rhythm — I finally feel like a
-                professional instead of a beginner with talent. My cuts are
-                faster, cleaner, and sharper.”
-                <span className="block font-bold mt-2 text-black">
-                  — Jordan, Los Angeles
-                </span>
-              </blockquote>
+              <h2 className="text-2xl font-bold mb-4">Workbook Materials</h2>
+              <p className="text-lg leading-relaxed">
+                Workbook and text sections will be added as the Foundation
+                course materials are finalized.
+              </p>
             </>
             ),
           },

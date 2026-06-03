@@ -15,6 +15,7 @@ type SeedCourse = {
   modules: {
     title: string;
     description?: string;
+    sortOrder?: number;
     lessons: {
       title: string;
       description?: string;
@@ -29,27 +30,66 @@ const seedCourses: SeedCourse[] = [
     title: "Foundation",
     subtitle: "Learn the craft. Build your confidence.",
     description:
-      "Get grounded in the essentials of barbering, from tool handling and cutting techniques to fades and client care.",
+      "Build the client communication, retention, business, and branding foundations that support a sustainable barbering career.",
     level: "Foundation",
     priceCents: 74900,
     duration: "8 weeks (self-paced)",
     sortOrder: 1,
     modules: [
       {
-        title: "Fundamentals",
-        description: "The essential craft standards behind confident barbering.",
+        title: "Client Communication & Retention",
+        description:
+          "Scaffold module for short video lessons, workbook prompts, and client relationship systems.",
+        sortOrder: 10,
         lessons: [
-          { title: "Tool Safety & Sanitation", duration: "10 min" },
-          { title: "Clipper Basics", duration: "14 min" },
-          { title: "First Fade Foundations", duration: "18 min" },
+          {
+            title: "Welcome & Module Overview",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Consultation Foundations",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Client Follow-Up & Retention",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Workbook Reflection",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
         ],
       },
       {
-        title: "Client Care",
-        description: "Build trust through clear consultation and shop flow.",
+        title: "Business & Branding Essentials",
+        description:
+          "Scaffold module for short video lessons, workbook prompts, and brand/business foundations.",
+        sortOrder: 20,
         lessons: [
-          { title: "Consultation Basics", duration: "9 min" },
-          { title: "Hygiene & Shop Flow", duration: "12 min" },
+          {
+            title: "Welcome & Module Overview",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Positioning Your Barber Brand",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Service Menu & Client Experience Basics",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
+          {
+            title: "Workbook Action Plan",
+            description: "Scaffold lesson for future video and workbook content.",
+            duration: "TBD",
+          },
         ],
       },
     ],
@@ -190,11 +230,12 @@ async function seedCourse(course: SeedCourse) {
   });
 
   for (const [moduleIndex, module] of course.modules.entries()) {
+    const moduleSortOrder = module.sortOrder ?? moduleIndex + 1;
     const savedModule = await prisma.module.upsert({
       where: {
         courseId_sortOrder: {
           courseId: savedCourse.id,
-          sortOrder: moduleIndex + 1,
+          sortOrder: moduleSortOrder,
         },
       },
       update: {
@@ -205,7 +246,7 @@ async function seedCourse(course: SeedCourse) {
         courseId: savedCourse.id,
         title: module.title,
         description: module.description,
-        sortOrder: moduleIndex + 1,
+        sortOrder: moduleSortOrder,
       },
     });
 

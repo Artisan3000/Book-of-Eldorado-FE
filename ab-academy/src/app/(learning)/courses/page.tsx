@@ -19,11 +19,11 @@ const coursePresentation: Record<string, CoursePresentation> = {
   foundation: {
     icon: <Scissors className="w-6 h-6" />,
     features: [
-      "Tool fundamentals & safety",
-      "Clipper basics & classic fades",
-      "Beard grooming essentials",
-      "Client care & hygiene",
-      "Portfolio starter guidance",
+      "Client communication foundations",
+      "Consultation habits & retention",
+      "Brand positioning basics",
+      "Service menu & client experience",
+      "Workbook reflections and action plans",
     ],
   },
   refinement: {
@@ -34,7 +34,7 @@ const coursePresentation: Record<string, CoursePresentation> = {
       "Skin fades & precision blending",
       "Advanced scissor-over-comb",
       "Razor detailing & line artistry",
-      "Business & branding essentials",
+      "Professional workflow systems",
       "Mentorship & peer support",
     ],
   },
