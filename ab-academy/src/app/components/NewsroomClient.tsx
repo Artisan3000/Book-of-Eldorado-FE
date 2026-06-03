@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useRef, useState } from "react";
 import { ExternalLink } from "lucide-react";
 
 interface NewsItem {
@@ -24,22 +24,25 @@ export default function NewsroomClient({ articles }: { articles: NewsItem[] }) {
 
   const categories = ["All", ...uniqueCategories];
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [filteredArticles, setFilteredArticles] = useState<NewsItem[]>(articles);
   const [isAnimating, setIsAnimating] = useState(false);
+  const animationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Smooth transition on filter change
-  useEffect(() => {
+  const filteredArticles =
+    selectedCategory === "All"
+      ? articles
+      : articles.filter((a) => a.category === selectedCategory);
+
+  const selectCategory = (category: string) => {
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current);
+    }
+
     setIsAnimating(true);
-    const timeout = setTimeout(() => {
-      setFilteredArticles(
-        selectedCategory === "All"
-          ? articles
-          : articles.filter((a) => a.category === selectedCategory)
-      );
+    setSelectedCategory(category);
+    animationTimeoutRef.current = setTimeout(() => {
       setIsAnimating(false);
     }, 200);
-    return () => clearTimeout(timeout);
-  }, [selectedCategory, articles]);
+  };
 
   return (
     <>
@@ -49,7 +52,7 @@ export default function NewsroomClient({ articles }: { articles: NewsItem[] }) {
           {categories.map((cat) => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => selectCategory(cat)}
               className={`px-4 py-2 text-sm font-medium relative overflow-hidden transition-all duration-300 ${
                 selectedCategory === cat
                   ? "text-white bg-black"

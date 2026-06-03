@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles, Star, Bookmark, CalendarDays, Flame } from "lucide-react";
+import { Sparkles, Bookmark, CalendarDays, Flame } from "lucide-react";
 
 export default function StudentExplore() {
   const [bookmarked, setBookmarked] = useState<number[]>([]);

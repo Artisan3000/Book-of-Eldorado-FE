@@ -6,7 +6,6 @@ import {
   Share2,
   Target,
   BookOpen,
-  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -68,7 +67,7 @@ export default function StudentAchievements() {
       {/* --- Learning Path --- */}
       <h3 className="text-xl mb-4 underline">Learning Path</h3>
       <div className="relative border-l border-black pl-8 mb-16">
-        {milestones.map((m, idx) => (
+        {milestones.map((m) => (
           <div
             key={m.id}
             className="mb-10 relative before:absolute before:w-4 before:h-4 before:rounded-full before:-left-[2.5rem] before:top-4 before:border before:border-black before:bg-white z-999"

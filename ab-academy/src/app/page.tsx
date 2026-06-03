@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { Scissors, Star, Award, Users } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -39,9 +40,12 @@ export default function Home() {
       <section className="relative border-b border-black text-center overflow-hidden">
         <div className="relative w-full h-[80vh] bg-black">
           {/* ✅ Placeholder Image */}
-          <img
+          <Image
             src="/hero-placeholder.png"
             alt="Artisan Barber Academy"
+            fill
+            priority
+            sizes="100vw"
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
               videoLoaded ? "opacity-0" : "opacity-100"
             }`}

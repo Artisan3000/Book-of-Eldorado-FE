@@ -1,4 +1,4 @@
-import { BookOpen, DollarSign, Users, Edit, PlusCircle, Star } from "lucide-react";
+import { BookOpen, DollarSign, Users, Star } from "lucide-react";
 
 export default function InstructorPage() {
   const stats = [
