@@ -1,12 +1,9 @@
 import { Settings } from "lucide-react";
+import { requireRole } from "@/lib/current-user";
+import ChangePasswordForm from "./ChangePasswordForm";
 
-export default function StudentProfile() {
-  const profile = {
-    name: "Brian Felix",
-    email: "brian@student.artisanbarber.com",
-    plan: "Pro Student",
-    renewal: "Nov 15, 2025",
-  };
+export default async function StudentProfile() {
+  const user = await requireRole(["STUDENT", "ADMIN"]);
 
   return (
     <section className="px-16 py-8 animate-fadeIn">
@@ -15,21 +12,17 @@ export default function StudentProfile() {
       </h2>
 
       <div className="border border-black p-6 max-w-2xl">
-        <p className="font-semibold mb-2">{profile.name}</p>
-        <p className="text-sm mb-1">Email: {profile.email}</p>
-        <p className="text-sm mb-1">Plan: {profile.plan}</p>
-        <p className="text-sm text-gray-700 mb-4">
-          Renewal Date: {profile.renewal}
-        </p>
+        <p className="font-semibold mb-2">{user.name}</p>
+        <p className="text-sm mb-1">Email: {user.email}</p>
+        <p className="text-sm mb-1">Role: {user.role}</p>
 
-        <div className="flex gap-3">
+        <div className="mt-4 flex gap-3">
           <button className="border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
             Edit Profile
           </button>
-          <button className="border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
-            Change Password
-          </button>
         </div>
+
+        <ChangePasswordForm />
       </div>
     </section>
   );
