@@ -1,5 +1,6 @@
 import { Settings } from "lucide-react";
 import type { AppUser } from "@/lib/user";
+import ChangeNameForm from "./ChangeNameForm";
 import ChangePasswordForm from "./ChangePasswordForm";
 
 export default function AccountProfile({ user }: { user: AppUser }) {
@@ -14,11 +15,7 @@ export default function AccountProfile({ user }: { user: AppUser }) {
         <p className="text-sm mb-1">Email: {user.email}</p>
         <p className="text-sm mb-1">Role: {user.role}</p>
 
-        <div className="mt-4 flex gap-3">
-          <button className="border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
-            Edit Profile
-          </button>
-        </div>
+        <ChangeNameForm name={user.name} />
 
         <ChangePasswordForm />
       </div>
