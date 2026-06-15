@@ -1,4 +1,5 @@
 import { PlayCircle, FileText, MessageSquare } from "lucide-react";
+import Link from "next/link";
 import Tabs from "@/app/components/Tabs";
 import { requireRole } from "@/lib/current-user";
 import { getStudentCourseDetail } from "@/lib/data/student";
@@ -47,14 +48,26 @@ export default async function CourseDetailPage({
             label: "Overview",
             content: (
               <div className="space-y-6">
-                <p>
-                  This course is organized into short lesson modules with
-                  workbook and text sections added as materials are finalized.
-                  Continue to the next lesson to keep progressing.
+                <p className="text-lg leading-relaxed text-gray-800">
+                  Foundation is organized around the professional habits that
+                  support your work beyond the cut. Start with client
+                  communication and retention, then move into the business and
+                  brand decisions that shape how you show up in the shop.
                 </p>
-                <button className="flex items-center gap-2 border border-black px-4 py-2 text-sm hover:bg-gray-100 transition">
-                  <PlayCircle className="w-4 h-4" /> Continue where you left off
-                </button>
+                <p className="text-sm leading-relaxed text-gray-600">
+                  Each lesson is designed to be short, practical, and tied to a
+                  real behavior you can practice with clients, instructors, or
+                  peers before moving to the next chapter.
+                </p>
+                {course.nextLessonHref && (
+                  <Link
+                    href={course.nextLessonHref}
+                    className="inline-flex items-center gap-3 border border-black bg-black px-6 py-3 text-base font-medium text-white transition hover:bg-gray-900"
+                  >
+                    <PlayCircle className="w-5 h-5" /> Continue where you left
+                    off
+                  </Link>
+                )}
               </div>
             ),
           },
@@ -92,10 +105,13 @@ export default async function CourseDetailPage({
                               {lesson.duration}
                             </p>
                           </div>
-                          <button className="flex items-center gap-2 border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
+                          <Link
+                            href={lesson.href}
+                            className="flex items-center gap-2 border border-black px-3 py-1 text-sm hover:bg-gray-100 transition"
+                          >
                             <PlayCircle className="w-4 h-4" />
                             {lesson.completed ? "Rewatch" : "Start Lesson"}
-                          </button>
+                          </Link>
                         </div>
                       ))}
                     </div>

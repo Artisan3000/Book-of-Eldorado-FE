@@ -1,17 +1,6 @@
-"use client";
-
-import { useState } from "react";
-import { Sparkles, Bookmark, CalendarDays, Flame } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 export default function StudentExplore() {
-  const [bookmarked, setBookmarked] = useState<number[]>([]);
-
-  const toggleBookmark = (id: number) => {
-    setBookmarked((prev) =>
-      prev.includes(id) ? prev.filter((b) => b !== id) : [...prev, id]
-    );
-  };
-
   const offerings = [
     {
       id: 1,
@@ -26,38 +15,6 @@ export default function StudentExplore() {
       description:
         "Take your craft to the next level with advanced barbering techniques.",
       price: "$85",
-    },
-  ];
-
-  const recommendations = [
-    {
-      id: 3,
-      title: "Color Grading with DaVinci Resolve",
-      description:
-        "Because you liked Mastering Lighting — explore professional-grade post-production techniques.",
-      price: "$65",
-    },
-    {
-      id: 4,
-      title: "Client Psychology & Consultation Skills",
-      description:
-        "Deepen your understanding of communication and client experience for luxury service.",
-      price: "$45",
-    },
-  ];
-
-  const upcoming = [
-    {
-      id: 5,
-      title: "Workshop: Texture & Technique Live",
-      date: "November 12, 2025",
-      location: "Brooklyn Studio",
-    },
-    {
-      id: 6,
-      title: "Live Q&A: Building Your Barber Portfolio",
-      date: "November 28, 2025",
-      location: "Virtual Session",
     },
   ];
 
@@ -83,18 +40,15 @@ export default function StudentExplore() {
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="font-semibold">{offer.title}</h3>
-              <button onClick={() => toggleBookmark(offer.id)}>
-                {bookmarked.includes(offer.id) ? (
-                  <Bookmark className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                ) : (
-                  <Bookmark className="w-4 h-4 text-gray-400 hover:text-black" />
-                )}
-              </button>
             </div>
             <p className="text-sm text-gray-700 mb-3">{offer.description}</p>
             <p className="text-sm font-semibold mb-4">{offer.price}</p>
-            <button className="border border-black px-3 py-1 text-sm hover:bg-black hover:text-white transition">
-              Learn More
+            <button
+              type="button"
+              disabled
+              className="border border-gray-400 px-3 py-1 text-sm text-gray-500 cursor-not-allowed"
+            >
+              Coming Soon
             </button>
           </div>
         ))}
@@ -102,58 +56,32 @@ export default function StudentExplore() {
 
       {/* --- Personalized Recommendations --- */}
       <h3 className="text-xl mb-4 underline">Recommended for You</h3>
-      <div className="grid md:grid-cols-2 gap-6 mb-16">
-        {recommendations.map((rec) => (
-          <div
-            key={rec.id}
-            className="border border-black p-6 flex flex-col justify-between hover:scale-[1.02] bg-white hover:bg-gray-50 transition-transform"
-          >
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="font-semibold">{rec.title}</h3>
-              <button onClick={() => toggleBookmark(rec.id)}>
-                {bookmarked.includes(rec.id) ? (
-                  <Bookmark className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                ) : (
-                  <Bookmark className="w-4 h-4 text-gray-400 hover:text-black" />
-                )}
-              </button>
-            </div>
-            <p className="text-sm text-gray-700 mb-3">{rec.description}</p>
-            <p className="text-sm font-semibold mb-4">{rec.price}</p>
-            <button className="border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
-              View Details
-            </button>
-          </div>
-        ))}
-      </div>
+      <EmptyState
+        title="No recommendations yet."
+        description="Personalized recommendations will appear here once more courses and student activity are available."
+      />
 
       {/* --- Upcoming Events --- */}
       <h3 className="text-xl mb-4 underline">Upcoming Events</h3>
-      <div className="grid md:grid-cols-2 gap-6">
-        {upcoming.map((event) => (
-          <div
-            key={event.id}
-            className="border border-black p-6 bg-white hover:bg-gray-50 flex flex-col justify-between transition-transform hover:scale-[1.02]"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="font-semibold flex items-center gap-2">
-                <CalendarDays className="w-4 h-4" />
-                {event.title}
-              </h4>
-              <Flame className="w-4 h-4 text-orange-500" />
-            </div>
-            <p className="text-sm text-gray-700 mb-1">
-              <strong>Date:</strong> {event.date}
-            </p>
-            <p className="text-sm text-gray-700 mb-4">
-              <strong>Location:</strong> {event.location}
-            </p>
-            <button className="border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
-              RSVP or Add to Calendar
-            </button>
-          </div>
-        ))}
-      </div>
+      <EmptyState
+        title="No upcoming events."
+        description="Workshops and live sessions will appear here once they are scheduled."
+      />
     </section>
+  );
+}
+
+function EmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="border border-dashed border-gray-400 p-8 text-center mb-16">
+      <p className="font-semibold text-black">{title}</p>
+      <p className="mt-2 text-sm text-gray-600">{description}</p>
+    </div>
   );
 }

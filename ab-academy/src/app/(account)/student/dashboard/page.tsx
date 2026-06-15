@@ -1,46 +1,39 @@
 import {
   BookOpen,
-  Award,
-  Clock,
-  Flame,
   PlayCircle,
 } from "lucide-react";
 import Link from "next/link";
 import MediaLibrary from "../../dashboard/components/MediaLibrary";
 import Mentorship from "../../dashboard/components/Mentorship";
-import ProgressTracker from "../../dashboard/components/ProgressTracker";
 import { requireRole } from "@/lib/current-user";
-import { getStudentDashboardData } from "@/lib/data/student";
+import {
+  getStudentDashboardData,
+  type WeeklyLessonProgress,
+} from "@/lib/data/student";
+
+function formatActivityDate(date: Date) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
 
 export default async function StudentDashboardPage() {
   const user = await requireRole(["STUDENT", "ADMIN"]);
-  const { profile, courses } = await getStudentDashboardData(user.id);
-
-  const wishlist = [
-    { id: 4, title: "Luxury Service 101", price: "$60" },
-    { id: 5, title: "Texture & Technique", price: "$75" },
-  ];
+  const { profile, courses, weeklyProgress } = await getStudentDashboardData(
+    user.id
+  );
 
   const stats = [
-    {
-      icon: <Clock className="w-5 h-5" />,
-      label: "Total Hours Watched",
-      value: `${profile.totalHours}h`,
-    },
     {
       icon: <BookOpen className="w-5 h-5" />,
       label: "Courses in Progress",
       value: profile.coursesInProgress,
     },
     {
-      icon: <Award className="w-5 h-5" />,
-      label: "Certificates Earned",
-      value: profile.certificates,
-    },
-    {
-      icon: <Flame className="w-5 h-5 text-orange-500" />,
-      label: "Learning Streak",
-      value: `${profile.streak} days`,
+      icon: <PlayCircle className="w-5 h-5" />,
+      label: "Lessons This Week",
+      value: profile.lessonsThisWeek,
     },
   ];
 
@@ -52,12 +45,12 @@ export default async function StudentDashboardPage() {
           Hi {profile.name}, ready to keep learning?
         </h1>
         <p className="text-gray-600 italic">
-          Keep up your streak — consistency makes mastery.
+          Your course activity is shown from your current enrollments.
         </p>
       </div>
 
       {/* --- Snapshot Cards --- */}
-      <div className="grid md:grid-cols-4 gap-6 mb-12">
+      <div className="grid gap-6 mb-12 md:grid-cols-2">
         {stats.map((stat) => (
           <div
             key={stat.label}
@@ -70,44 +63,49 @@ export default async function StudentDashboardPage() {
         ))}
       </div>
 
-      {/* --- Activity & Recommendations --- */}
-      <div className="border border-dashed border-gray-400 p-10 text-center text-gray-500 italic my-10">
-        [Upcoming Live Sessions, New Course Drops, or Recommended Lessons
-        Placeholder]
-      </div>
-
       {/* --- Courses in Progress --- */}
       <div className="mb-16">
         <h3 className="text-xl mb-4 font-semibold underline">
           Courses in Progress
         </h3>
-        <div className="grid md:grid-cols-3 gap-6">
-          {courses.map((course) => (
-            <Link
-              key={course.id}
-              href={`/student/courses/${course.slug}`}
-              className="border border-black p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 group"
-            >
-              <div>
-                <h3 className="font-semibold mb-2 group-hover:underline">
-                  {course.title}
-                </h3>
-                <div className="h-2 bg-gray-200 mb-2">
-                  <div
-                    className="h-2 bg-black"
-                    style={{ width: `${course.progress * 100}%` }}
-                  />
+        {courses.length > 0 ? (
+          <div className="grid md:grid-cols-3 gap-6">
+            {courses.map((course) => (
+              <Link
+                key={course.id}
+                href={`/student/courses/${course.slug}`}
+                className="border border-black p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300 group"
+              >
+                <div>
+                  <h3 className="font-semibold mb-2 group-hover:underline">
+                    {course.title}
+                  </h3>
+                  <div className="h-2 bg-gray-200 mb-2">
+                    <div
+                      className="h-2 bg-black"
+                      style={{ width: `${course.progress * 100}%` }}
+                    />
+                  </div>
+                  <p className="text-xs text-gray-600">
+                    {course.completedLessons} of {course.totalLessons} lessons
+                    completed
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    Progress: {Math.round(course.progress * 100)}%
+                  </p>
                 </div>
-                <p className="text-xs text-gray-600">
-                  Progress: {Math.round(course.progress * 100)}%
-                </p>
-              </div>
-              <div className="flex items-center gap-1 mt-4 border border-black px-3 py-1 text-sm group-hover:bg-gray-100 transition">
-                <PlayCircle className="w-4 h-4" /> Continue
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="flex items-center gap-1 mt-4 border border-black px-3 py-1 text-sm group-hover:bg-gray-100 transition">
+                  <PlayCircle className="w-4 h-4" /> Continue
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No active course enrollments yet."
+            description="Courses will appear here once this student is enrolled."
+          />
+        )}
       </div>
 
       {/* --- Progress Tracker --- */}
@@ -115,7 +113,7 @@ export default async function StudentDashboardPage() {
         <h3 className="text-xl mb-4 font-semibold underline">
           Weekly Progress
         </h3>
-        <ProgressTracker />
+        <WeeklyProgressList progress={weeklyProgress} />
       </div>
 
       {/* --- Media Library --- */}
@@ -139,23 +137,66 @@ export default async function StudentDashboardPage() {
         <h3 className="text-xl mb-4 font-semibold underline">
           Explore More Courses
         </h3>
-        <div className="grid md:grid-cols-2 gap-6">
-          {wishlist.map((item) => (
-            <div
-              key={item.id}
-              className="border border-black p-6 flex flex-col justify-between hover:scale-[1.02] transition-transform duration-300"
-            >
-              <div>
-                <h3 className="font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-700 text-sm">{item.price}</p>
-              </div>
-              <button className="mt-4 border border-black px-3 py-1 text-sm hover:bg-gray-100 transition">
-                Enroll Now
-              </button>
-            </div>
-          ))}
-        </div>
+        <EmptyState
+          title="No additional courses are available yet."
+          description="New course options will appear here after the first course is built out."
+        />
       </div>
     </section>
+  );
+}
+
+function WeeklyProgressList({
+  progress,
+}: {
+  progress: WeeklyLessonProgress[];
+}) {
+  if (progress.length === 0) {
+    return (
+      <EmptyState
+        title="No lesson progress in the last seven days."
+        description="Recent lesson activity will appear here once online lessons are available and started."
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {progress.map((item) => (
+        <div
+          key={item.id}
+          className="border border-black p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"
+        >
+          <div>
+            <p className="font-semibold">{item.lessonTitle}</p>
+            <p className="text-sm text-gray-600">
+              {item.courseTitle} / {item.moduleTitle}
+            </p>
+            {item.duration && (
+              <p className="text-xs text-gray-600">{item.duration}</p>
+            )}
+          </div>
+          <div className="text-sm text-gray-700 md:text-right">
+            <p>{item.status}</p>
+            <p>{formatActivityDate(item.activityAt)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="border border-dashed border-gray-400 p-8 text-center">
+      <p className="font-semibold text-black">{title}</p>
+      <p className="mt-2 text-sm text-gray-600">{description}</p>
+    </div>
   );
 }

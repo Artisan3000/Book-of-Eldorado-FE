@@ -39,56 +39,94 @@ const seedCourses: SeedCourse[] = [
       {
         title: "Client Communication & Retention",
         description:
-          "Scaffold module for short video lessons, workbook prompts, and client relationship systems.",
+          "Build the consultation, client communication, rebooking, and retention habits that support a professional barbering career.",
         sortOrder: 10,
         lessons: [
           {
-            title: "Welcome & Module Overview",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "The Artisan Consultation Framework",
+            description:
+              "Learn the four-part consultation framework: ask about lifestyle, listen fully, read what is already there, and set expectations before the service begins.",
+            duration: "8-10 min",
           },
           {
-            title: "Consultation Foundations",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "Managing Difficult Conversations",
+            description:
+              "Practice professional responses to unhappy clients, unrealistic requests, graceful declines, and recovery conversations.",
+            duration: "10-12 min",
           },
           {
-            title: "Client Follow-Up & Retention",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "Building Your Chair-Side Presence",
+            description:
+              "Develop the tone, energy, focus, and room awareness that help clients feel fully seen during every appointment.",
+            duration: "8-10 min",
           },
           {
-            title: "Workbook Reflection",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "Rebooking & Retention Habits",
+            description:
+              "Make rebooking a natural part of the service, handle cancellations professionally, and start tracking retention as a career metric.",
+            duration: "9-11 min",
+          },
+          {
+            title: "Digital Client Communication",
+            description:
+              "Bring Artisan-level professionalism into DMs, texts, Squire inquiries, expectation-setting, and written communication.",
+            duration: "9-11 min",
+          },
+          {
+            title: "Chapter Assessment",
+            description:
+              "Complete a mock consultation and scenario responses that test consultation, expectation-setting, communication, and retention judgment.",
+            duration: "6-8 min",
           },
         ],
       },
       {
         title: "Business & Branding Essentials",
         description:
-          "Scaffold module for short video lessons, workbook prompts, and brand/business foundations.",
+          "Understand how the shop makes money, how the Artisan brand works day to day, and how to build a professional identity within it.",
         sortOrder: 20,
         lessons: [
           {
-            title: "Welcome & Module Overview",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "How a Barbershop Actually Makes Money",
+            description:
+              "Learn the core revenue streams, how each chair affects shop profitability, where retail and add-ons fit, and why your book is a business asset.",
+            duration: "8-10 min",
           },
           {
-            title: "Positioning Your Barber Brand",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "The Artisan Brand: What It Means Day-to-Day",
+            description:
+              "Understand what the Artisan brand stands for, what the shop is and is not, and how every barber extends the brand through daily practice.",
+            duration: "7-9 min",
           },
           {
-            title: "Service Menu & Client Experience Basics",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "Building Your Personal Brand Within the Shop",
+            description:
+              "Define your identity as a barber, find your specialty, align with Artisan without losing your voice, and think about your long-term portfolio.",
+            duration: "9-11 min",
           },
           {
-            title: "Workbook Action Plan",
-            description: "Scaffold lesson for future video and workbook content.",
-            duration: "TBD",
+            title: "Social Media for Barbers",
+            description:
+              "Practice what to post, how to shoot your work, caption and hashtag strategy, engaging with the Artisan account, and using social presence to support your book.",
+            duration: "10-12 min",
+          },
+          {
+            title: "Pricing, Upselling & Retail",
+            description:
+              "Understand your value, introduce add-ons naturally, recommend products without sounding pushy, and see how retail benefits everyone.",
+            duration: "9-11 min",
+          },
+          {
+            title: "Professionalism & Shop Etiquette",
+            description:
+              "Build standards around punctuality, station care, teamwork, slow days, and professionalism in a shared shop environment.",
+            duration: "7-9 min",
+          },
+          {
+            title: "Chapter Assessment",
+            description:
+              "Complete a brand alignment exercise, one-week content plan, and written scenarios covering business judgment, professionalism, and brand decisions.",
+            duration: "6-8 min",
           },
         ],
       },
