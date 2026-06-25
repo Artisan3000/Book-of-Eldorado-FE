@@ -1,3 +1,4 @@
+import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 function getChapterNumber(sortOrder: number) {
@@ -10,6 +11,9 @@ function getChapterNumber(sortOrder: number) {
 
 export default async function AdminCoursesPage() {
   const courses = await prisma.course.findMany({
+    where: {
+      status: CourseStatus.PUBLISHED,
+    },
     orderBy: { sortOrder: "asc" },
     select: {
       id: true,

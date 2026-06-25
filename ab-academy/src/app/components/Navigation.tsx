@@ -26,12 +26,10 @@ export default function Navigation({ user }: { user: AppUser | null }) {
         <Link href="/courses" className="hover:underline">
           Courses
         </Link>
-        <Link href="/membership" className="hover:underline">
-          Membership
-        </Link>
-        <Link href="/blog" className="hover:underline">
-          Blog
-        </Link>
+        {/*
+          Membership and Blog are hidden until those sections are ready to
+          promote in the primary navigation.
+        */}
       </div>
 
       {/* Auth / Dashboard Buttons */}

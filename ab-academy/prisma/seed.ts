@@ -242,6 +242,9 @@ async function seedUsers() {
 }
 
 async function seedCourse(course: SeedCourse) {
+  const status =
+    course.slug === "foundation" ? CourseStatus.PUBLISHED : CourseStatus.ARCHIVED;
+
   const savedCourse = await prisma.course.upsert({
     where: { slug: course.slug },
     update: {
@@ -252,7 +255,7 @@ async function seedCourse(course: SeedCourse) {
       priceCents: course.priceCents,
       duration: course.duration,
       sortOrder: course.sortOrder,
-      status: CourseStatus.PUBLISHED,
+      status,
     },
     create: {
       slug: course.slug,
@@ -263,7 +266,7 @@ async function seedCourse(course: SeedCourse) {
       priceCents: course.priceCents,
       duration: course.duration,
       sortOrder: course.sortOrder,
-      status: CourseStatus.PUBLISHED,
+      status,
     },
   });
 

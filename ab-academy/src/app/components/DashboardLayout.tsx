@@ -10,6 +10,7 @@ interface DashboardLayoutProps {
   tabs?: string[];
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  disabledTabs?: string[];
   user?: AppUser | null;
 }
 
@@ -20,8 +21,13 @@ export default function DashboardLayout({
   tabs = [],
   activeTab,
   onTabChange,
+  disabledTabs = [],
   user,
 }: DashboardLayoutProps) {
+  const disabledTabSet = new Set(
+    disabledTabs.map((tab) => tab.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -48,13 +54,22 @@ export default function DashboardLayout({
         <nav className="flex border-b border-black text-sm uppercase">
           {tabs.map((tab) => {
             const isActive = activeTab?.toLowerCase() === tab.toLowerCase();
+            const isDisabled = disabledTabSet.has(tab.toLowerCase());
 
             return (
               <button
                 key={tab}
-                onClick={() => onTabChange?.(tab)}
+                onClick={() => {
+                  if (!isDisabled) {
+                    onTabChange?.(tab);
+                  }
+                }}
+                disabled={isDisabled}
+                aria-disabled={isDisabled}
                 className={`relative px-6 py-3 border-r border-black last:border-r-0 transition-colors duration-300 ${
-                  isActive
+                  isDisabled
+                    ? "cursor-not-allowed bg-gray-100 text-gray-400"
+                    : isActive
                     ? "bg-black text-white"
                     : "hover:bg-gray-100 hover:text-gray-800"
                 }`}

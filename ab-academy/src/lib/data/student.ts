@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { LessonProgressStatus } from "@prisma/client";
+import { CourseStatus, LessonProgressStatus } from "@prisma/client";
 import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { prisma } from "@/lib/prisma";
 
@@ -62,6 +62,9 @@ export async function getStudentDashboardData(userId: string) {
       enrollments: {
         where: {
           status: "ACTIVE",
+          course: {
+            status: CourseStatus.PUBLISHED,
+          },
         },
         orderBy: {
           startedAt: "asc",
@@ -102,6 +105,9 @@ export async function getStudentDashboardData(userId: string) {
         userId,
         status: {
           in: ["ACTIVE", "COMPLETED"],
+        },
+        course: {
+          status: CourseStatus.PUBLISHED,
         },
       },
       status: {
@@ -222,6 +228,7 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
       userId,
       course: {
         slug,
+        status: CourseStatus.PUBLISHED,
       },
     },
     select: {

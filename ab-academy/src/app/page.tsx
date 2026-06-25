@@ -123,34 +123,20 @@ export default function Home() {
         className="px-8 py-16 border-b border-black opacity-0"
       >
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">The Artisan Progression</h2>
+          <h2 className="text-3xl font-bold mb-4">Foundation</h2>
           <p className="text-lg font-light">
-            A three-part journey designed to transform beginners into confident
-            professionals.
+            Start with the professional habits every barber needs behind the
+            chair.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 text-left">
+        <div className="mx-auto grid max-w-xl gap-8 text-left">
           {[
             {
               title: "Foundation",
               subtitle: "Learn the craft. Build your confidence.",
-              desc: "Get grounded in the essentials of barbering — from tool handling and cutting techniques to understanding face shapes, fades, and client service.",
+              desc: "Build the client communication, retention, business, and branding foundations that support a sustainable barbering career.",
               link: "/courses/foundation",
-              highlight: false,
-            },
-            {
-              title: "Refinement",
-              subtitle: "Sharpen your eye. Strengthen your flow.",
-              desc: "Take your skills to the next level with advanced techniques, styling precision, and workflow discipline.",
-              link: "/courses/refinement",
-              highlight: true,
-            },
-            {
-              title: "Mastery",
-              subtitle: "Define your style. Lead with excellence.",
-              desc: "Develop your personal artistry and professional identity. Learn the nuances that separate good barbers from great ones.",
-              link: "/courses/mastery",
               highlight: false,
             },
           ].map((course, i) => (
@@ -218,9 +204,8 @@ export default function Home() {
           Join the Academy Today
         </h2>
         <p className="mb-8 max-w-xl mx-auto text-lg font-light leading-relaxed">
-          Whether you’re just starting out, ready to refine your craft, or
-          building a barbershop business, Artisan Barber Academy has a course
-          for you.
+          Whether you’re just starting out or building stronger professional
+          habits, Foundation is the first step inside Artisan Barber Academy.
         </p>
         <div className="flex justify-center gap-4">
           <Link

@@ -25,8 +25,13 @@ export default function AdminShell({
     "Revenue",
     "Logs",
     "Profile",
-    "Settings",
-    "Extras",
+  ];
+  const disabledTabs = [
+    "Instructors",
+    "Certificates",
+    "Workshops",
+    "Memberships",
+    "Revenue",
   ];
 
   const tabRoutes: Record<string, string> = {
@@ -40,8 +45,6 @@ export default function AdminShell({
     Revenue: "/admin/revenue",
     Logs: "/admin/logs",
     Profile: "/admin/profile",
-    Settings: "/admin/settings",
-    Extras: "/admin/extras",
   };
 
   const activeTab =
@@ -55,6 +58,7 @@ export default function AdminShell({
       tabs={tabs}
       activeTab={activeTab}
       user={user}
+      disabledTabs={disabledTabs}
       onTabChange={(tab) => router.push(tabRoutes[tab])}
     >
       {children}

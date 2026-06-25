@@ -31,22 +31,17 @@ export default function Footer() {
           <Link href="/courses" className="hover:underline">
             Courses
           </Link>
-          <Link href="/membership" className="hover:underline">
-            Membership
-          </Link>
-          <Link href="/gifts" className="hover:underline">
-            Gifts
-          </Link>
+          {/*
+            Membership is hidden until it is ready to promote in site chrome.
+          */}
+          {/* Gifts are hidden until gift purchases are ready to promote. */}
         </div>
 
         {/* Center: Nav Links */}
         <div className="flex flex-col space-y-2 text-sm">
           <h3 className="italic font-semibold">Resources</h3>
-          <Link href="/privacy" className="hover:underline">
-            Privacy
-          </Link>
-          <Link href="/terms" className="hover:underline">
-            Terms
+          <Link href="/privacy-terms" className="hover:underline">
+            Privacy & Terms
           </Link>
           <Link href="/support" className="hover:underline">
             Support

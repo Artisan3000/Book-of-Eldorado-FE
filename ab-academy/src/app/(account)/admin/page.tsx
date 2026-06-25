@@ -1,18 +1,35 @@
-import { Users, BookOpen, DollarSign, ClipboardList } from "lucide-react";
+import { CourseStatus } from "@prisma/client";
+import { Users, BookOpen } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const [totalUsers, activeCourses] = await Promise.all([
+    prisma.user.count(),
+    prisma.course.count({
+      where: {
+        status: CourseStatus.PUBLISHED,
+      },
+    }),
+  ]);
+
   const stats = [
-    { icon: <Users className="w-5 h-5" />, label: "Total Users", value: "1,452" },
-    { icon: <BookOpen className="w-5 h-5" />, label: "Active Courses", value: "38" },
-    { icon: <DollarSign className="w-5 h-5" />, label: "Monthly Revenue", value: "$12,540" },
-    { icon: <ClipboardList className="w-5 h-5" />, label: "Pending Approvals", value: "6" },
+    {
+      icon: <Users className="w-5 h-5" />,
+      label: "Total Users",
+      value: totalUsers.toLocaleString(),
+    },
+    {
+      icon: <BookOpen className="w-5 h-5" />,
+      label: "Active Courses",
+      value: activeCourses.toLocaleString(),
+    },
   ];
 
   return (
     <section className="animate-fadeIn px-16 py-2">
       <h2 className="text-2xl italic mb-6 flex items-center gap-2">Overview</h2>
 
-      <div className="grid md:grid-cols-4 gap-6 mb-16">
+      <div className="grid gap-6 mb-16 md:grid-cols-2">
         {stats.map((stat) => (
           <div
             key={stat.label}
@@ -26,7 +43,7 @@ export default function AdminPage() {
       </div>
 
       <div className="border border-dashed border-gray-400 p-10 text-center text-gray-500 italic">
-        [User Activity Log Placeholder]
+        Admin activity will appear here once audit logging is connected.
       </div>
     </section>
   );

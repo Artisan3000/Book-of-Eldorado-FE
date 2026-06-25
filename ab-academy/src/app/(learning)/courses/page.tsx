@@ -59,12 +59,11 @@ export default async function CoursesOverview() {
     <main className="px-8 py-16 font-serif text-black overflow-hidden">
       {/* Hero */}
       <Reveal className="max-w-4xl mx-auto text-center mb-16 opacity-0">
-        <h1 className="text-6xl font-bold mb-4">The Artisan Progression</h1>
+        <h1 className="text-6xl font-bold mb-4">Foundation</h1>
         <p className="text-lg mb-8 leading-relaxed">
-          A three-part journey designed to transform beginners into confident professionals.
-          Each stage builds on the last — from mastering the fundamentals to defining your
-          signature style behind the chair. Whether you’re just starting out or ready to refine
-          your artistry, there’s a course that meets you where you are.
+          Start with the habits that support a sustainable barbering career:
+          client communication, retention, business awareness, brand judgment,
+          and professional shop standards.
         </p>
         <Link
           href="/membership"
@@ -97,10 +96,11 @@ export default async function CoursesOverview() {
 
       {/* CTA Section */}
       <Reveal className="text-center bg-black text-white py-16 mb-16 opacity-0">
-        <h2 className="text-3xl font-bold mb-4 animate-fadeUp">Start Your Journey Today</h2>
+        <h2 className="text-3xl font-bold mb-4 animate-fadeUp">Start With Foundation</h2>
         <p className="max-w-2xl mx-auto mb-8 text-lg font-light leading-relaxed">
-          Every great barber starts somewhere. Choose your path — whether you’re laying the foundation,
-          refining your edge, or mastering your craft, Artisan Barber Academy will guide you every step of the way.
+          Every great barber starts somewhere. Foundation is the first course in
+          the academy, built around the real-world habits students need before
+          advanced programs are introduced.
         </p>
         <Link
           href="/membership"
@@ -116,7 +116,7 @@ export default async function CoursesOverview() {
         <div className="space-y-6 text-sm leading-relaxed">
           <FaqItem
             question="Do I need experience to start?"
-            answer="The Foundation course is designed for complete newcomers. Refinement and Mastery are ideal for experienced barbers looking to advance and define their signature style."
+            answer="No. Foundation is designed for complete newcomers and early-career barbers who want stronger professional habits."
           />
           <FaqItem
             question="Will I receive a certification?"
@@ -124,11 +124,11 @@ export default async function CoursesOverview() {
           />
           <FaqItem
             question="What kind of support is included?"
-            answer="Each course provides guided assignments, video tutorials, and feedback loops. Refinement and Mastery include mentorship sessions and community discussions."
+            answer="Foundation includes guided lessons and assignments. More support options will be added as the academy expands."
           />
           <FaqItem
             question="Can I move between levels?"
-            answer="Absolutely. Start at your current level and progress at your own pace. You can upgrade anytime by paying only the difference between courses."
+            answer="Foundation is the only active course right now. Additional course paths will appear once they are ready."
           />
         </div>
       </Reveal>
