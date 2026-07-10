@@ -25,6 +25,7 @@ type StudentLessonExperienceProps = {
     videoUrl: string | null;
     moduleTitle: string;
     progressStatus: LessonProgressStatus;
+    lastPositionSeconds: number;
   };
   slug: string;
   lessonSlug: string;
@@ -106,6 +107,7 @@ export default function StudentLessonExperience({
               courseSlug={slug}
               lessonSlug={lessonSlug}
               progressStatus={progressStatus}
+              savedPositionSeconds={lesson.lastPositionSeconds}
               onDurationChange={handleDurationChange}
               onProgressStatusChange={handleProgressStatusChange}
             />

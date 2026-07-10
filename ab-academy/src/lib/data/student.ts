@@ -276,6 +276,7 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
         select: {
           lessonId: true,
           status: true,
+          lastPositionSeconds: true,
         },
       },
     },
@@ -286,7 +287,7 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
   }
 
   const progressByLesson = new Map(
-    enrollment.progress.map((progress) => [progress.lessonId, progress.status])
+    enrollment.progress.map((progress) => [progress.lessonId, progress])
   );
   const visibleModules = getVisibleCourseModules(
     enrollment.course.slug,
@@ -297,7 +298,9 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     lessons: module.lessons.map((lesson) => ({
       ...lesson,
       progressStatus:
-        progressByLesson.get(lesson.id) ?? LessonProgressStatus.NOT_STARTED,
+        progressByLesson.get(lesson.id)?.status ?? LessonProgressStatus.NOT_STARTED,
+      lastPositionSeconds:
+        progressByLesson.get(lesson.id)?.lastPositionSeconds ?? 0,
       slug: getLessonSlug({
         moduleSortOrder: module.sortOrder,
         lessonSortOrder: lesson.sortOrder,
@@ -308,7 +311,9 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
         lessonSortOrder: lesson.sortOrder,
         title: lesson.title,
       })}`,
-      completed: progressByLesson.get(lesson.id) === LessonProgressStatus.COMPLETED,
+      completed:
+        progressByLesson.get(lesson.id)?.status ===
+        LessonProgressStatus.COMPLETED,
     })),
   }));
   const lessons = modules.flatMap((module) => module.lessons);

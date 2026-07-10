@@ -145,6 +145,7 @@ model LessonProgress {
   status       LessonProgressStatus @default(NOT_STARTED)
   completedAt  DateTime?
   lastViewedAt DateTime?
+  lastPositionSeconds Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -24,6 +24,7 @@ export default async function StudentLessonPage({
           videoUrl: lesson.videoUrl,
           moduleTitle: lesson.moduleTitle,
           progressStatus: lesson.progressStatus,
+          lastPositionSeconds: lesson.lastPositionSeconds,
         }}
         slug={slug}
         lessonSlug={lessonSlug}

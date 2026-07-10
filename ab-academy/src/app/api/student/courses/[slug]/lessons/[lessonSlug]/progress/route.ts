@@ -15,12 +15,35 @@ const supportedStatuses = new Set<LessonProgressStatus>([
   LessonProgressStatus.IN_PROGRESS,
   LessonProgressStatus.COMPLETED,
 ]);
+const MAX_PLAYBACK_POSITION_SECONDS = 12 * 60 * 60;
+
+const progressSelect = {
+  id: true,
+  status: true,
+  completedAt: true,
+  lastViewedAt: true,
+  lastPositionSeconds: true,
+} satisfies Prisma.LessonProgressSelect;
 
 function isUniqueConstraintError(error: unknown) {
   return (
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2002"
   );
+}
+
+function getValidatedPlaybackPosition(value: unknown) {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    !Number.isInteger(value) ||
+    value < 0 ||
+    value > MAX_PLAYBACK_POSITION_SECONDS
+  ) {
+    return null;
+  }
+
+  return value;
 }
 
 async function findExistingProgress(enrollmentId: string, lessonId: string) {
@@ -31,12 +54,7 @@ async function findExistingProgress(enrollmentId: string, lessonId: string) {
         lessonId,
       },
     },
-    select: {
-      id: true,
-      status: true,
-      completedAt: true,
-      lastViewedAt: true,
-    },
+    select: progressSelect,
   });
 }
 
@@ -65,12 +83,7 @@ async function markInProgress({
               status: LessonProgressStatus.IN_PROGRESS,
               lastViewedAt: now,
             },
-      select: {
-        id: true,
-        status: true,
-        completedAt: true,
-        lastViewedAt: true,
-      },
+      select: progressSelect,
     });
   }
 
@@ -82,12 +95,7 @@ async function markInProgress({
         status: LessonProgressStatus.IN_PROGRESS,
         lastViewedAt: now,
       },
-      select: {
-        id: true,
-        status: true,
-        completedAt: true,
-        lastViewedAt: true,
-      },
+      select: progressSelect,
     });
   } catch (error) {
     if (!isUniqueConstraintError(error)) {
@@ -118,13 +126,9 @@ async function markCompleted({
         status: LessonProgressStatus.COMPLETED,
         completedAt: existingProgress.completedAt ?? now,
         lastViewedAt: now,
+        lastPositionSeconds: 0,
       },
-      select: {
-        id: true,
-        status: true,
-        completedAt: true,
-        lastViewedAt: true,
-      },
+      select: progressSelect,
     });
   }
 
@@ -136,13 +140,9 @@ async function markCompleted({
         status: LessonProgressStatus.COMPLETED,
         completedAt: now,
         lastViewedAt: now,
+        lastPositionSeconds: 0,
       },
-      select: {
-        id: true,
-        status: true,
-        completedAt: true,
-        lastViewedAt: true,
-      },
+      select: progressSelect,
     });
   } catch (error) {
     if (!isUniqueConstraintError(error)) {
@@ -150,6 +150,114 @@ async function markCompleted({
     }
 
     return markCompleted({ enrollmentId, lessonId, now });
+  }
+}
+
+async function savePlaybackPosition({
+  enrollmentId,
+  lessonId,
+  positionSeconds,
+  updateLastViewedAt,
+  now,
+}: {
+  enrollmentId: string;
+  lessonId: string;
+  positionSeconds: number;
+  updateLastViewedAt: boolean;
+  now: Date;
+}) {
+  const existingProgress = await findExistingProgress(enrollmentId, lessonId);
+
+  if (existingProgress) {
+    if (existingProgress.status === LessonProgressStatus.COMPLETED) {
+      if (existingProgress.lastPositionSeconds === 0) {
+        return existingProgress;
+      }
+
+      return prisma.lessonProgress.update({
+        where: {
+          id: existingProgress.id,
+        },
+        data: {
+          lastPositionSeconds: 0,
+        },
+        select: progressSelect,
+      });
+    }
+
+    if (positionSeconds > existingProgress.lastPositionSeconds) {
+      const updateResult = await prisma.lessonProgress.updateMany({
+        where: {
+          id: existingProgress.id,
+          status: {
+            not: LessonProgressStatus.COMPLETED,
+          },
+          lastPositionSeconds: {
+            lte: positionSeconds,
+          },
+        },
+        data: {
+          lastPositionSeconds: positionSeconds,
+          ...(updateLastViewedAt ? { lastViewedAt: now } : {}),
+        },
+      });
+
+      if (updateResult.count > 0) {
+        const updatedProgress = await findExistingProgress(enrollmentId, lessonId);
+
+        if (!updatedProgress) {
+          throw new Error("Lesson progress could not be found after update.");
+        }
+
+        return updatedProgress;
+      }
+
+      return savePlaybackPosition({
+        enrollmentId,
+        lessonId,
+        positionSeconds,
+        updateLastViewedAt,
+        now,
+      });
+    }
+
+    if (updateLastViewedAt) {
+      return prisma.lessonProgress.update({
+        where: {
+          id: existingProgress.id,
+        },
+        data: {
+          lastViewedAt: now,
+        },
+        select: progressSelect,
+      });
+    }
+
+    return existingProgress;
+  }
+
+  try {
+    return await prisma.lessonProgress.create({
+      data: {
+        enrollmentId,
+        lessonId,
+        lastPositionSeconds: positionSeconds,
+        ...(updateLastViewedAt ? { lastViewedAt: now } : {}),
+      },
+      select: progressSelect,
+    });
+  } catch (error) {
+    if (!isUniqueConstraintError(error)) {
+      throw error;
+    }
+
+    return savePlaybackPosition({
+      enrollmentId,
+      lessonId,
+      positionSeconds,
+      updateLastViewedAt,
+      now,
+    });
   }
 }
 
@@ -168,11 +276,27 @@ export async function POST(
   }
 
   const body = await request.json().catch(() => null);
+  const requestedAction = body?.action;
   const requestedStatus = body?.status as LessonProgressStatus | undefined;
 
-  if (!requestedStatus || !supportedStatuses.has(requestedStatus)) {
+  if (
+    requestedAction !== "SAVE_POSITION" &&
+    (!requestedStatus || !supportedStatuses.has(requestedStatus))
+  ) {
     return NextResponse.json(
       { error: "Unsupported lesson progress status." },
+      { status: 400 }
+    );
+  }
+
+  const requestedPositionSeconds =
+    requestedAction === "SAVE_POSITION"
+      ? getValidatedPlaybackPosition(body?.positionSeconds)
+      : null;
+
+  if (requestedAction === "SAVE_POSITION" && requestedPositionSeconds === null) {
+    return NextResponse.json(
+      { error: "Playback position must be a finite non-negative whole number." },
       { status: 400 }
     );
   }
@@ -244,22 +368,32 @@ export async function POST(
 
   const now = new Date();
   const progress =
-    requestedStatus === LessonProgressStatus.COMPLETED
-      ? await markCompleted({
+    requestedAction === "SAVE_POSITION"
+      ? await savePlaybackPosition({
           enrollmentId: enrollment.id,
           lessonId: lesson.id,
+          positionSeconds: requestedPositionSeconds ?? 0,
+          updateLastViewedAt: body?.interaction === "pause",
           now,
         })
-      : await markInProgress({
-          enrollmentId: enrollment.id,
-          lessonId: lesson.id,
-          now,
-        });
+      : requestedStatus === LessonProgressStatus.COMPLETED
+        ? await markCompleted({
+            enrollmentId: enrollment.id,
+            lessonId: lesson.id,
+            now,
+          })
+        : await markInProgress({
+            enrollmentId: enrollment.id,
+            lessonId: lesson.id,
+            now,
+          });
 
-  revalidatePath("/student/dashboard");
-  revalidatePath("/student/courses");
-  revalidatePath(`/student/courses/${slug}`);
-  revalidatePath(`/student/courses/${slug}/lessons/${lessonSlug}`);
+  if (requestedAction !== "SAVE_POSITION" || body?.interaction === "pause") {
+    revalidatePath("/student/dashboard");
+    revalidatePath("/student/courses");
+    revalidatePath(`/student/courses/${slug}`);
+    revalidatePath(`/student/courses/${slug}/lessons/${lessonSlug}`);
+  }
 
   return NextResponse.json({
     progress: {
@@ -267,6 +401,7 @@ export async function POST(
       completed: progress.status === LessonProgressStatus.COMPLETED,
       completedAt: progress.completedAt,
       lastViewedAt: progress.lastViewedAt,
+      lastPositionSeconds: progress.lastPositionSeconds,
     },
   });
 }
