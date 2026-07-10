@@ -35,6 +35,7 @@ export default async function AdminCoursesPage() {
               title: true,
               duration: true,
               sortOrder: true,
+              videoUrl: true,
             },
           },
         },
@@ -107,6 +108,7 @@ export default async function AdminCoursesPage() {
                               <th className="py-2 pr-4 font-medium">
                                 Duration
                               </th>
+                              <th className="py-2 pr-4 font-medium">Video</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -124,6 +126,19 @@ export default async function AdminCoursesPage() {
                                 </td>
                                 <td className="py-3 pr-4 text-gray-600">
                                   {lesson.duration || "Not set"}
+                                </td>
+                                <td className="py-3 pr-4">
+                                  <span
+                                    className={`inline-block border px-2 py-1 text-xs ${
+                                      lesson.videoUrl
+                                        ? "border-black text-black"
+                                        : "border-gray-300 text-gray-500"
+                                    }`}
+                                  >
+                                    {lesson.videoUrl
+                                      ? "Video attached"
+                                      : "Missing video"}
+                                  </span>
                                 </td>
                               </tr>
                             ))}

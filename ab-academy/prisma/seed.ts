@@ -20,6 +20,7 @@ type SeedCourse = {
       title: string;
       description?: string;
       duration: string;
+      videoUrl?: string;
     }[];
   }[];
 };
@@ -47,18 +48,21 @@ const seedCourses: SeedCourse[] = [
             description:
               "Learn the four-part consultation framework: ask about lifestyle, listen fully, read what is already there, and set expectations before the service begins.",
             duration: "8-10 min",
+            videoUrl: "https://player.vimeo.com/video/1208793359",
           },
           {
             title: "Managing Difficult Conversations",
             description:
               "Practice professional responses to unhappy clients, unrealistic requests, graceful declines, and recovery conversations.",
             duration: "10-12 min",
+            videoUrl: "https://player.vimeo.com/video/1208793357",
           },
           {
             title: "Building Your Chair-Side Presence",
             description:
               "Develop the tone, energy, focus, and room awareness that help clients feel fully seen during every appointment.",
             duration: "8-10 min",
+            videoUrl: "https://player.vimeo.com/video/1208793358",
           },
           {
             title: "Rebooking & Retention Habits",
@@ -292,6 +296,9 @@ async function seedCourse(course: SeedCourse) {
     });
 
     for (const [lessonIndex, lesson] of module.lessons.entries()) {
+      const lessonVideoData =
+        lesson.videoUrl === undefined ? {} : { videoUrl: lesson.videoUrl };
+
       await prisma.lesson.upsert({
         where: {
           moduleId_sortOrder: {
@@ -303,12 +310,14 @@ async function seedCourse(course: SeedCourse) {
           title: lesson.title,
           description: lesson.description,
           duration: lesson.duration,
+          ...lessonVideoData,
         },
         create: {
           moduleId: savedModule.id,
           title: lesson.title,
           description: lesson.description,
           duration: lesson.duration,
+          ...lessonVideoData,
           sortOrder: lessonIndex + 1,
         },
       });
