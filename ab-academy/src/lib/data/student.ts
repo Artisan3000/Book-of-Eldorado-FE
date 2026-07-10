@@ -1,7 +1,11 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { CourseStatus, LessonProgressStatus } from "@prisma/client";
+import {
+  CourseStatus,
+  EnrollmentStatus,
+  LessonProgressStatus,
+} from "@prisma/client";
 import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { prisma } from "@/lib/prisma";
 
@@ -29,7 +33,7 @@ function getChapterNumber(moduleSortOrder: number) {
   return moduleSortOrder;
 }
 
-function getLessonSlug({
+export function getLessonSlug({
   moduleSortOrder,
   lessonSortOrder,
   title,
@@ -226,6 +230,9 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
   const enrollment = await prisma.enrollment.findFirst({
     where: {
       userId,
+      status: {
+        in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED],
+      },
       course: {
         slug,
         status: CourseStatus.PUBLISHED,
@@ -257,6 +264,7 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
                   title: true,
                   description: true,
                   duration: true,
+                  videoUrl: true,
                   sortOrder: true,
                 },
               },
@@ -288,6 +296,8 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     ...module,
     lessons: module.lessons.map((lesson) => ({
       ...lesson,
+      progressStatus:
+        progressByLesson.get(lesson.id) ?? LessonProgressStatus.NOT_STARTED,
       slug: getLessonSlug({
         moduleSortOrder: module.sortOrder,
         lessonSortOrder: lesson.sortOrder,
