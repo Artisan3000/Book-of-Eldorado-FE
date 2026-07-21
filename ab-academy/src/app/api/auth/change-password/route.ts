@@ -1,17 +1,24 @@
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { AuthEventType } from "@prisma/client";
 import { hashPassword, hashSessionToken, verifyPassword } from "@/lib/auth";
+import { recordAuthEvent } from "@/lib/auth/audit";
+import { hashAuthIdentifier } from "@/lib/auth/identifiers";
+import { getClientIp, requireBrowserMutation } from "@/lib/auth/request-security";
+import { authJson } from "@/lib/auth/responses";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE_NAME } from "@/lib/session-cookie";
 
 const MIN_PASSWORD_LENGTH = 8;
 
 export async function POST(request: Request) {
+  const requestError = requireBrowserMutation(request);
+  if (requestError) return requestError;
+
   const cookieStore = await cookies();
   const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
   if (!sessionToken) {
-    return NextResponse.json({ error: "You must be logged in." }, { status: 401 });
+    return authJson({ error: "You must be logged in." }, { status: 401 });
   }
 
   const session = await prisma.session.findUnique({
@@ -24,7 +31,12 @@ export async function POST(request: Request) {
   });
 
   if (!session || session.expiresAt <= new Date() || !session.user.isActive) {
-    return NextResponse.json({ error: "You must be logged in." }, { status: 401 });
+    if (session) {
+      await prisma.session.deleteMany({ where: { id: session.id } });
+    }
+    cookieStore.delete(SESSION_COOKIE_NAME);
+
+    return authJson({ error: "You must be logged in." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -35,21 +47,21 @@ export async function POST(request: Request) {
     typeof body?.confirmPassword === "string" ? body.confirmPassword : "";
 
   if (!currentPassword || !newPassword || !confirmPassword) {
-    return NextResponse.json(
+    return authJson(
       { error: "Current password, new password, and confirmation are required." },
       { status: 400 }
     );
   }
 
   if (newPassword.length < MIN_PASSWORD_LENGTH) {
-    return NextResponse.json(
+    return authJson(
       { error: `New password must be at least ${MIN_PASSWORD_LENGTH} characters.` },
       { status: 400 }
     );
   }
 
   if (newPassword !== confirmPassword) {
-    return NextResponse.json(
+    return authJson(
       { error: "New password and confirmation do not match." },
       { status: 400 }
     );
@@ -61,7 +73,7 @@ export async function POST(request: Request) {
   );
 
   if (!passwordMatches) {
-    return NextResponse.json(
+    return authJson(
       { error: "Current password is incorrect." },
       { status: 401 }
     );
@@ -88,5 +100,12 @@ export async function POST(request: Request) {
     }),
   ]);
 
-  return NextResponse.json({ ok: true });
+  await recordAuthEvent({
+    type: AuthEventType.PASSWORD_CHANGED,
+    userId: session.user.id,
+    identifierHash: hashAuthIdentifier("account", session.user.email),
+    ipHash: hashAuthIdentifier("ip", getClientIp(request)),
+  });
+
+  return authJson({ ok: true });
 }

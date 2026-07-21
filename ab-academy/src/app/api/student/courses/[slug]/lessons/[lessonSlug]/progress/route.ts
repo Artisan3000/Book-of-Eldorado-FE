@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { userHasRole } from "@/lib/auth";
+import { requireBrowserMutation } from "@/lib/auth/request-security";
+import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import {
   CourseStatus,
   EnrollmentStatus,
@@ -269,10 +272,17 @@ export async function POST(
     params: Promise<{ slug: string; lessonSlug: string }>;
   }
 ) {
+  const requestError = requireBrowserMutation(request);
+  if (requestError) return requestError;
+
   const user = await getCurrentUser();
 
   if (!user) {
     return NextResponse.json({ error: "You must be logged in." }, { status: 401 });
+  }
+
+  if (!userHasRole(user.role, STUDENT_EXPERIENCE_ROLES)) {
+    return NextResponse.json({ error: "You are not allowed to update lesson progress." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

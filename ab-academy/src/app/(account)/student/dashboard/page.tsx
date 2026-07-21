@@ -6,6 +6,7 @@ import Link from "next/link";
 import MediaLibrary from "../../dashboard/components/MediaLibrary";
 import Mentorship from "../../dashboard/components/Mentorship";
 import { requireRole } from "@/lib/current-user";
+import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import {
   getStudentDashboardData,
   type WeeklyLessonProgress,
@@ -19,7 +20,7 @@ function formatActivityDate(date: Date) {
 }
 
 export default async function StudentDashboardPage() {
-  const user = await requireRole(["STUDENT", "ADMIN"]);
+  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
   const { profile, courses, weeklyProgress } = await getStudentDashboardData(
     user.id
   );

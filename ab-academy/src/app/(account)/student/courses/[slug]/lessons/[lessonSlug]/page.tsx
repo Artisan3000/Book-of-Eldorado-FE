@@ -1,4 +1,5 @@
 import { requireRole } from "@/lib/current-user";
+import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentLessonDetail } from "@/lib/data/student";
 import StudentLessonExperience from "./StudentLessonExperience";
 
@@ -7,7 +8,7 @@ export default async function StudentLessonPage({
 }: {
   params: Promise<{ slug: string; lessonSlug: string }>;
 }) {
-  const user = await requireRole(["STUDENT", "ADMIN"]);
+  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
   const { slug, lessonSlug } = await params;
   const { course, lesson, previousLesson, nextLesson } =
     await getStudentLessonDetail(user.id, slug, lessonSlug);

@@ -2,6 +2,7 @@ import { PlayCircle, FileText, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import Tabs from "@/app/components/Tabs";
 import { requireRole } from "@/lib/current-user";
+import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentCourseDetail } from "@/lib/data/student";
 
 export default async function CourseDetailPage({
@@ -9,7 +10,7 @@ export default async function CourseDetailPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const user = await requireRole(["STUDENT", "ADMIN"]);
+  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
   const { slug } = await params;
   const course = await getStudentCourseDetail(user.id, slug);
 

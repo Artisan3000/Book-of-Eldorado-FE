@@ -31,6 +31,7 @@ export async function createSession(userId: string) {
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE_SECONDS,
+    expires: expiresAt,
   });
 
   return { token, expiresAt };
@@ -51,14 +52,7 @@ export async function destroyCurrentSession() {
   cookieStore.delete(SESSION_COOKIE_NAME);
 }
 
-export async function getCurrentUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-
-  if (!token) {
-    return null;
-  }
-
+async function findCurrentSessionUser(token: string) {
   const session = await prisma.session.findUnique({
     where: {
       tokenHash: hashSessionToken(token),
@@ -68,7 +62,24 @@ export async function getCurrentUser() {
     },
   });
 
+  return session;
+}
+
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  const session = await findCurrentSessionUser(token);
+
   if (!session || session.expiresAt <= new Date() || !session.user.isActive) {
+    if (session) {
+      await prisma.session.deleteMany({ where: { id: session.id } });
+    }
+
     return null;
   }
 
@@ -85,7 +96,7 @@ export async function requireUser() {
   return user;
 }
 
-export async function requireRole(allowedRoles: Role[]) {
+export async function requireRole(allowedRoles: readonly Role[]) {
   const user = await requireUser();
 
   if (!userHasRole(user.role, allowedRoles)) {

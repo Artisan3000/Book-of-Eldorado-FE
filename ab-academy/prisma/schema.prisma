@@ -12,7 +12,24 @@ enum Role {
   ADMIN
   INSTRUCTOR
   STUDENT
+  EMPLOYEE
   MEMBER
+}
+
+enum AuthEventType {
+  LOGIN_SUCCEEDED
+  LOGIN_FAILED
+  LOGIN_THROTTLED
+  LOGOUT
+  PASSWORD_CHANGED
+  AUTHORIZATION_CODE_ISSUED
+  AUTHORIZATION_CODE_EXCHANGED
+  AUTHORIZATION_EXCHANGE_REJECTED
+}
+
+enum LoginThrottleScope {
+  ACCOUNT
+  IP
 }
 
 enum CourseStatus {
@@ -44,9 +61,40 @@ model User {
 
   sessions    Session[]
   enrollments Enrollment[]
+  authEvents  AuthEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model LoginThrottle {
+  keyHash         String             @id
+  scope           LoginThrottleScope
+  failureCount    Int                @default(0)
+  windowStartedAt DateTime
+  blockedUntil    DateTime?
+
+  updatedAt DateTime @default(now()) @updatedAt
+
+  @@index([blockedUntil])
+  @@index([updatedAt])
+}
+
+model AuthEvent {
+  id             String        @id @default(cuid())
+  type           AuthEventType
+  userId         String?
+  user           User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  identifierHash String?
+  ipHash         String?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
+  @@index([identifierHash, createdAt])
+  @@index([ipHash, createdAt])
+  @@index([createdAt])
 }
 
 model Session {
