@@ -6,7 +6,7 @@ const visibleFoundationModuleTitles = new Set([
 export function getVisibleCourseModules<T extends { title: string }>(
   courseSlug: string,
   modules: readonly T[]
-) {
+): T[] {
   if (courseSlug !== "foundation") {
     return [...modules];
   }
