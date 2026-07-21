@@ -17,7 +17,7 @@ passwords, Academy session tokens, or direct Neon credentials.
 | Phase | Status | Notes |
 | --- | --- | --- |
 | Discovery and architecture | Completed | Local code, Git history, prototype SQL, live Prisma schema, and deployment assumptions reviewed. |
-| Phase 1A: Employee role support | In progress | Implementation, build, and production migration verified; branch deployment remains. |
+| Phase 1A: Employee role support | In progress | Implementation, build, migration, commit, and push verified; preview verification remains. |
 | Phase 1B: Authentication hardening | In progress | Implementation, build, and production migration verified; branch deployment and end-to-end verification remain. |
 | Phase 2: Artisan authorization bridge | Not started | Add PKCE authorization-code issuance and exchange, disabled by default. |
 | Artisan callback and session | Deferred | Implement later in the Artisan frontend repository. |
@@ -47,7 +47,7 @@ passwords, Academy session tokens, or direct Neon credentials.
 - The onboarding prototype is a domain reference, not production-ready SQL.
 - The working branch is `academy-auth-bridge`.
 
-## Current implementation baseline
+## Current implementation
 
 The Academy application currently uses:
 
@@ -60,27 +60,33 @@ The Academy application currently uses:
 - Host-only, HTTP-only, secure-in-production, `SameSite=Lax` cookies.
 - Thirty-day database-backed sessions.
 - Server-side role enforcement in protected layouts.
+- Centralized role groups with `EMPLOYEE` sharing the Student experience.
+- Distributed account and IP login throttling backed by Neon.
+- Secret-safe authentication audit events.
+- Exact-origin and JSON content-type enforcement for browser mutations.
+- Safe internal login continuation handling.
+- Opportunistic rejection and database cleanup of expired sessions.
 
 The live Neon schema was inspected read-only on July 21, 2026. It matched the
-checked-in Prisma schema exactly, both migrations were applied, and there was no
-schema drift. No table records were inspected.
+checked-in Prisma schema exactly before Phase 1, with both historical migrations
+applied and no schema drift. The reviewed Phase 1 migration was subsequently
+applied and verified. Production now has all three checked-in migrations. No
+table records were inspected or modified during verification.
 
-Discovery baseline gaps (addressed locally unless otherwise noted):
+Remaining gaps:
 
-- No login throttling.
-- No authentication audit log.
-- No explicit same-origin enforcement for cookie-authenticated mutations.
-- No content-type enforcement for authentication requests.
-- Expired sessions and invalid cookies are not cleaned up opportunistically.
-- The proxy creates a `next` login parameter, but the login page ignores it.
 - No database-backed route or concurrency test environment is configured.
 - No tracked CI or migration-deployment automation exists.
 - `npm run build` runs only `next build`.
 - `npm run db:deploy` runs `prisma migrate deploy` separately.
+- The pushed Phase 1 branch has not yet been verified in a Vercel preview.
+- Existing-role and authentication flows still require end-to-end preview
+  verification.
+- Phase 2 SSO has not started.
 
 ## Role and authorization policy
 
-The target Prisma enum is:
+The current Prisma enum is:
 
 ```prisma
 enum Role {
@@ -102,7 +108,7 @@ Target behavior:
 | `EMPLOYEE` | `/student/dashboard`; same access as Student | Allowed |
 | `MEMBER` | `/member`; existing behavior retained | Denied |
 
-Role groups should be centralized rather than repeated throughout route files:
+Role groups are centralized rather than repeated throughout route files:
 
 ```ts
 STUDENT_EXPERIENCE_ROLES = ["STUDENT", "EMPLOYEE", "ADMIN"]
@@ -119,41 +125,52 @@ sufficient.
 
 Status: In progress
 
+Implementation, migration, automated checks, production build, commit, and push
+are complete. Vercel preview and end-to-end role verification remain before this
+phase can be marked completed.
+
 ### Scope
 
-1. Add `EMPLOYEE` to the Prisma `Role` enum.
-2. Prepare an additive migration using PostgreSQL `ALTER TYPE ... ADD VALUE`.
-3. Add the Employee role home route: `/student/dashboard`.
-4. Centralize role groups.
-5. Update every student layout, page, and server-side guard to accept
-   `EMPLOYEE`.
-6. Preserve Instructor, Member, and Admin behavior.
-7. Update seed support only if a dedicated development employee is useful.
-8. Add tests for role destinations and allowed-role groups.
+- [x] Add `EMPLOYEE` to the Prisma `Role` enum.
+- [x] Create and apply an additive migration using PostgreSQL
+  `ALTER TYPE ... ADD VALUE`.
+- [x] Add the Employee role home route: `/student/dashboard`.
+- [x] Centralize role groups.
+- [x] Update every student layout, page, and server-side guard to accept
+  `EMPLOYEE`.
+- [x] Preserve Instructor, Member, and Admin behavior in code and unit tests.
+- [x] Keep seed behavior unchanged; a dedicated development Employee is not
+  currently required.
+- [x] Add tests for role destinations and allowed-role groups.
 
 ### Acceptance criteria
 
-- Existing roles keep their current destinations.
-- An Employee can access all routes available to a Student.
-- An Employee cannot access Admin, Instructor, or Member-only routes unless a
-  route was already intentionally shared.
-- A Student, Instructor, or Member is not eligible for Artisan SSO.
-- The Prisma schema validates and Prisma Client generates successfully.
-- The migration is additive and contains no destructive statements.
-- Lint, typecheck, tests, and production build pass.
+- [x] Existing role destinations and exact role groups pass unit tests.
+- [x] Employee receives the Student route group in code and unit tests.
+- [x] Employee is excluded from Admin, Instructor, and Member-only role groups.
+- [x] Student, Instructor, and Member are excluded from Artisan eligibility.
+- [x] The Prisma schema validates and Prisma Client generates successfully.
+- [x] The applied migration is additive and contains no destructive statements.
+- [x] Lint, typecheck, unit tests, and production build pass.
+- [ ] Existing roles and Employee behavior are verified end to end in a Vercel
+  preview.
 
 ## Phase 1B: Authentication hardening
 
 Status: In progress
 
+Implementation, migration, automated checks, production build, commit, and push
+are complete. Vercel preview and end-to-end authentication verification remain
+before this phase can be marked completed.
+
 ### Data model
 
-Add two narrowly scoped Prisma models.
+Phase 1 added two narrowly scoped Prisma models.
 
 `LoginThrottle` stores distributed rate-limit state using hashed identifiers.
 It must not store raw passwords, raw email addresses, or raw IP addresses.
 
-Planned fields:
+Implemented fields:
 
 - `keyHash` primary key.
 - Failure count.
@@ -163,7 +180,7 @@ Planned fields:
 
 `AuthEvent` is an append-only security audit trail.
 
-Planned event categories:
+Implemented event categories:
 
 - Login succeeded.
 - Login failed.
@@ -179,7 +196,7 @@ authorization codes, client secrets, or complete request bodies.
 
 ### Request-security utilities
 
-Add server-only helpers for:
+Implemented server-only helpers for:
 
 - Normalized email handling.
 - Safe internal redirect validation.
@@ -193,7 +210,7 @@ Add server-only helpers for:
 On Vercel, production IP throttling may trust Vercel's overwritten
 `x-forwarded-for` header. Local development must use a conservative fallback.
 
-### Login throttling
+### Implemented login throttling
 
 - Apply account/email and client-IP limits independently.
 - Store only keyed hashes of normalized identifiers.
@@ -203,7 +220,7 @@ On Vercel, production IP throttling may trust Vercel's overwritten
 - Reset or reduce applicable failure state after a successful login.
 - Return a bounded `Retry-After` response when throttled.
 
-### Session lifecycle
+### Implemented session lifecycle
 
 - Preserve opaque random session tokens and database token hashes.
 - Reject invalid or expired sessions. Route handlers that encounter a stale
@@ -213,9 +230,9 @@ On Vercel, production IP throttling may trust Vercel's overwritten
 - Preserve revocation of other sessions after a password change.
 - Add audit events for session-sensitive actions.
 
-### Safe continuation
+### Implemented safe continuation
 
-Repair the existing login continuation flow:
+The repaired login continuation flow:
 
 - Accept only same-origin paths beginning with a single `/`.
 - Reject schemes, hostnames, protocol-relative paths, backslashes, control
@@ -223,9 +240,9 @@ Repair the existing login continuation flow:
 - Fall back to the authenticated user's role home route.
 - Never send an external SSO callback through the ordinary `next` parameter.
 
-### Expected code organization
+### Implemented code organization
 
-New server-only modules are expected under `src/lib/auth/`, covering:
+New server-only modules under `src/lib/auth/` cover:
 
 - Request security.
 - Redirect validation.
@@ -233,7 +250,7 @@ New server-only modules are expected under `src/lib/auth/`, covering:
 - Audit events.
 - Authentication response helpers.
 
-Existing routes expected to change:
+Updated routes include:
 
 - `src/app/api/auth/login/route.ts`
 - `src/app/api/auth/logout/route.ts`
@@ -244,16 +261,20 @@ Existing routes expected to change:
 
 ### Acceptance criteria
 
-- Repeated credential failures are throttled across serverless instances.
-- Unknown, inactive, and wrong-password accounts do not reveal account state.
-- Cookie-authenticated mutations reject untrusted origins.
-- Unsafe continuation paths never redirect externally.
-- Invalid and expired sessions are rejected, and the referenced expired
-  database session is deleted opportunistically.
-- Security events are useful without containing secrets.
-- Existing login, logout, password change, account name change, and protected
-  routes continue working.
-- Lint, typecheck, tests, and production build pass.
+- [x] Distributed throttling state is implemented for account and IP buckets.
+- [x] Unknown, inactive, and wrong-password accounts use generic public errors.
+- [x] Cookie-authenticated mutations enforce exact trusted origins and JSON
+  content types.
+- [x] Unsafe continuation paths are rejected by tested pure validation logic.
+- [x] Invalid and expired sessions are rejected, with referenced expired
+  database sessions deleted opportunistically.
+- [x] Audit models and writers omit passwords, tokens, codes, secrets, and raw
+  request bodies.
+- [x] Lint, typecheck, unit tests, Prisma validation, and production build pass.
+- [ ] Existing login, logout, password change, account name change, and
+  protected routes are verified end to end in a Vercel preview.
+- [ ] Login throttling and audit persistence are exercised against a disposable
+  or approved non-production integration-test database.
 
 ## Phase 2: Artisan authorization bridge
 
@@ -381,19 +402,29 @@ Use the existing Node test runner through `tsx` and keep most security logic in
 pure functions where possible. Add a heavier framework only when database route
 fixtures justify it.
 
-Required unit coverage:
+Implemented unit coverage:
 
 - Email normalization.
 - Internal redirect acceptance and rejection.
 - Origin validation.
 - Role destinations and portal eligibility.
-- Rate-limit boundaries and backoff.
+
+Remaining Phase 1 automated coverage:
+
+- Rate-limit boundaries, backoff, and concurrent updates against a disposable
+  database.
+- Route-level successful, failed, and throttled login behavior.
+- Logout, password-change, and account-name mutation enforcement.
+- Session expiration behavior.
+- Secret-safe audit persistence.
+
+Phase 2 unit coverage will add:
+
 - PKCE challenge verification.
 - Code expiry and replay rules.
 - Exact callback matching.
-- Secret-safe audit payload construction.
 
-Required route/integration coverage:
+Required Phase 2 route/integration coverage:
 
 - Successful and failed login.
 - Throttled login.
@@ -439,22 +470,27 @@ rollout is reversed.
 
 ## Deployment plan
 
-1. Work on `academy-auth-bridge`.
-2. Complete Phase 1A and Phase 1B locally.
-3. Validate without connecting tests to production Neon.
-4. Review the exact Phase 1 migration.
-5. Request permission for a read-only production migration-status check.
-6. Report the result.
-7. Request separate permission to run `npm run db:deploy`.
-8. Verify the applied migration.
-9. Deploy compatible Academy code to a Vercel preview.
-10. Verify all existing roles and auth flows.
-11. Promote the Academy code before provisioning an Employee account.
-12. Implement Phase 2 behind `ARTISAN_SSO_ENABLED=false`.
-13. Repeat migration review and approval for Phase 2.
-14. Test the disabled bridge in production and enabled bridge in controlled
-    development/preview configuration.
-15. Push and enable production SSO only when the Artisan callback is ready.
+- [x] Create and work on `academy-auth-bridge`.
+- [x] Complete Phase 1A and Phase 1B locally.
+- [x] Validate without connecting tests to production Neon.
+- [x] Review the exact Phase 1 migration.
+- [x] Complete the approved read-only production migration-status check.
+- [x] Complete the approved production build.
+- [x] Apply the reviewed Phase 1 migration with `prisma migrate deploy`.
+- [x] Verify production migration status after application.
+- [x] Configure `AUTH_IDENTIFIER_HASH_SECRET` in Vercel Preview and Production.
+- [x] Commit and push `academy-auth-bridge` at `c498eac`.
+- [ ] Confirm the Vercel preview deployment succeeds.
+- [ ] Verify all existing roles and authentication flows in preview.
+- [ ] Merge and promote the Academy code before provisioning an Employee
+  account.
+- [ ] Monitor the initial production rollout for login failures, throttling,
+  and unexpected authorization behavior.
+- [ ] Implement Phase 2 behind `ARTISAN_SSO_ENABLED=false`.
+- [ ] Repeat migration review and approval for Phase 2.
+- [ ] Test the disabled bridge in production and the enabled bridge in a
+  controlled development or preview configuration.
+- [ ] Push and enable production SSO only when the Artisan callback is ready.
 
 ## Rollback approach
 
@@ -503,13 +539,12 @@ acknowledgments, and define media storage.
   a manually controlled production step.
 - Confirmed the `jul 21 backup` Neon restore branch exists and must remain
   untouched.
-- Created the local `academy-auth-bridge` branch; nothing has been committed or
-  pushed.
+- Created `academy-auth-bridge` for the Academy work.
 - Implemented `EMPLOYEE` role support and centralized exact role groups. Local
   tests verify the full Academy access matrix and Artisan eligibility matrix.
-- Prepared the additive Phase 1 migration for the Employee enum, distributed
-  login-throttle state, and secret-safe authentication audit events. The
-  migration has not been applied.
+- Prepared and independently reviewed the additive Phase 1 migration for the
+  Employee enum, distributed login-throttle state, and secret-safe
+  authentication audit events.
 - Implemented local authentication hardening: exact-origin and JSON mutation
   guards, generic credential errors, account and IP throttling, safe login
   continuation, no-store responses, audit events, and session-expiry cleanup.
@@ -535,3 +570,11 @@ acknowledgments, and define media storage.
   `prisma migrate deploy`. Prisma then confirmed all three migrations are
   applied and the production schema is up to date. No user record was created
   or changed.
+- Configured the same strong `AUTH_IDENTIFIER_HASH_SECRET` in the Academy Vercel
+  Preview and Production environments. The value is server-only and is not
+  committed.
+- Committed the complete Phase 1 implementation as `c498eac` (`Harden Academy
+  auth and add employee role`) and pushed `academy-auth-bridge` to the Academy
+  GitHub remote.
+- Left Phase 1 marked in progress pending Vercel preview deployment and
+  end-to-end verification of existing roles and authentication flows.
