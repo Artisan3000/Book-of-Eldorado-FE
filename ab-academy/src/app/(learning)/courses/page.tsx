@@ -7,6 +7,14 @@ import {
   getPublishedCourses,
   type PublishedCourse,
 } from "@/lib/data/courses";
+import { absoluteUrl } from "@/lib/site-config";
+
+export const metadata: Metadata = {
+  title: "Barbering Courses",
+  description:
+    "Explore professional barbering courses from foundation through advanced craft and career development.",
+  alternates: { canonical: absoluteUrl("/courses") },
+};
 
 type CoursePresentation = {
   icon: ReactNode;
@@ -209,3 +217,4 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
     </div>
   );
 }
+import type { Metadata } from "next";

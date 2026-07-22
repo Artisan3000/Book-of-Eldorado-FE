@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function LoginPage() {
         return;
       }
 
+      trackEvent("login_completed", { method: "password" });
       router.push(data.redirectTo || "/dashboard");
       router.refresh();
     } catch {

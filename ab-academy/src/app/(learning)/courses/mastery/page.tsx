@@ -1,6 +1,16 @@
 import Image from "next/image";
 import Tabs from "@/app/components/Tabs";
 import { getRequiredCourseBySlug } from "@/lib/data/courses";
+import { absoluteUrl } from "@/lib/site-config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const course = await getRequiredCourseBySlug("mastery");
+  return {
+    title: course.title,
+    description: course.description,
+    alternates: { canonical: absoluteUrl("/courses/mastery") },
+  };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -121,3 +131,4 @@ export default async function MasteryCoursePage() {
     </main>
   );
 }
+import type { Metadata } from "next";

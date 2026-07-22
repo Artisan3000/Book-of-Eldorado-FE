@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { blogPosts } from "@/lib/blog-posts";
+import { absoluteUrl } from "@/lib/site-config";
+
+export const metadata: Metadata = {
+  title: "Journal",
+  description:
+    "Barbering education, tools, professional development, and Academy news.",
+  alternates: { canonical: absoluteUrl("/blog") },
+};
 
 export default function BlogPage() {
   return (

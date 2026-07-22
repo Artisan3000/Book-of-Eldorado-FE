@@ -3,6 +3,16 @@ import Link from "next/link";
 import Tabs from "@/app/components/Tabs";
 import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { getRequiredCourseBySlug } from "@/lib/data/courses";
+import { absoluteUrl } from "@/lib/site-config";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const course = await getRequiredCourseBySlug("foundation");
+  return {
+    title: course.title,
+    description: course.description,
+    alternates: { canonical: absoluteUrl("/courses/foundation") },
+  };
+}
 
 export const dynamic = "force-dynamic";
 
@@ -118,3 +128,4 @@ export default async function FoundationCoursePage() {
     </main>
   );
 }
+import type { Metadata } from "next";
