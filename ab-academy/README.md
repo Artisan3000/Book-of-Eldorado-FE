@@ -34,3 +34,18 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Google measurement
+
+Google Analytics and Search Console verification are configured through
+environment variables. Both integrations remain disabled when their variables
+are absent.
+
+```bash
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+GOOGLE_SITE_VERIFICATION=verification-token
+```
+
+Use the GA4 web stream measurement ID for `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+`GOOGLE_SITE_VERIFICATION` is only needed when Search Console is verified with
+an HTML meta tag; it is not required for DNS verification.
