@@ -1,6 +1,6 @@
 # Academy Authentication and Artisan SSO Plan
 
-Last updated: July 21, 2026
+Last updated: July 23, 2026
 
 ## Objective
 
@@ -17,8 +17,8 @@ passwords, Academy session tokens, or direct Neon credentials.
 | Phase | Status | Notes |
 | --- | --- | --- |
 | Discovery and architecture | Completed | Local code, Git history, prototype SQL, live Prisma schema, and deployment assumptions reviewed. |
-| Phase 1A: Employee role support | In progress | Implementation, build, migration, commit, and push verified; preview verification remains. |
-| Phase 1B: Authentication hardening | In progress | Implementation, build, and production migration verified; branch deployment and end-to-end verification remain. |
+| Phase 1A: Employee role support | In progress | Merged to `main`; corrected production deployment and end-to-end verification remain. |
+| Phase 1B: Authentication hardening | In progress | Merged to `main`; corrected production deployment and end-to-end verification remain. |
 | Phase 2: Artisan authorization bridge | Not started | Add PKCE authorization-code issuance and exchange, disabled by default. |
 | Artisan callback and session | Deferred | Implement later in the Artisan frontend repository. |
 | Employee onboarding platform | Deferred | Translate the approved parts of the onboarding prototype after SSO is stable. |
@@ -77,11 +77,13 @@ Remaining gaps:
 
 - No database-backed route or concurrency test environment is configured.
 - No tracked CI or migration-deployment automation exists.
-- `npm run build` runs only `next build`.
+- `npm run build` generates Prisma Client and then runs `next build`.
 - `npm run db:deploy` runs `prisma migrate deploy` separately.
-- The pushed Phase 1 branch has not yet been verified in a Vercel preview.
-- Existing-role and authentication flows still require end-to-end preview
-  verification.
+- The first post-merge Vercel production build failed because a restored
+  dependency cache contained a Prisma Client generated before the Phase 1
+  enums existed. A deterministic build fix is ready for deployment.
+- Existing-role and authentication flows still require end-to-end production
+  verification after the corrected deployment.
 - Phase 2 SSO has not started.
 
 ## Role and authorization policy
@@ -480,10 +482,14 @@ rollout is reversed.
 - [x] Verify production migration status after application.
 - [x] Configure `AUTH_IDENTIFIER_HASH_SECRET` in Vercel Preview and Production.
 - [x] Commit and push `academy-auth-bridge` at `c498eac`.
-- [ ] Confirm the Vercel preview deployment succeeds.
-- [ ] Verify all existing roles and authentication flows in preview.
-- [ ] Merge and promote the Academy code before provisioning an Employee
-  account.
+- [x] Merge `academy-auth-bridge` into `main` as `5960826`.
+- [x] Diagnose the first Vercel production build failure.
+- [x] Update the build to run `prisma generate` before `next build`.
+- [x] Verify the corrected build locally with tests, typecheck, lint, and all
+  38 routes.
+- [x] Commit and push the deterministic Prisma generation fix to `main`.
+- [ ] Confirm the corrected Vercel production deployment succeeds.
+- [ ] Verify all existing roles and authentication flows in production.
 - [ ] Monitor the initial production rollout for login failures, throttling,
   and unexpected authorization behavior.
 - [ ] Implement Phase 2 behind `ARTISAN_SSO_ENABLED=false`.
@@ -520,6 +526,21 @@ must relate onboarding profiles to Academy users, replace the prototype's
 acknowledgments, and define media storage.
 
 ## Progress log
+
+### July 23, 2026
+
+- Merged `academy-auth-bridge` into `main` through pull request 1 at `5960826`.
+- Preserved both the newer Academy analytics work and Phase 1 authentication
+  behavior while updating the branch from `main`.
+- The first Vercel production deployment compiled but failed typechecking
+  because cached Prisma Client output did not export the new `AuthEventType`.
+- Identified the root cause as missing deterministic Prisma Client generation
+  in the Vercel build path; no schema or migration failure occurred.
+- Updated `npm run build` to execute `prisma generate && next build`.
+- Verified the fix locally: all 11 tests, TypeScript, ESLint, Prisma generation,
+  and the production build passed across 38 routes.
+- Preserved unrelated local edits in `prisma/seed.ts` and
+  `prisma/map-vimeo-lessons.ts`; they are not part of this deployment fix.
 
 ### July 21, 2026
 
