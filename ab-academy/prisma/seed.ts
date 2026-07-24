@@ -47,40 +47,43 @@ const seedCourses: SeedCourse[] = [
             title: "The Artisan Consultation Framework",
             description:
               "Learn the four-part consultation framework: ask about lifestyle, listen fully, read what is already there, and set expectations before the service begins.",
-            duration: "8-10 min",
+            duration: "8 min",
             videoUrl: "https://player.vimeo.com/video/1208793359",
           },
           {
             title: "Managing Difficult Conversations",
             description:
               "Practice professional responses to unhappy clients, unrealistic requests, graceful declines, and recovery conversations.",
-            duration: "10-12 min",
+            duration: "11 min",
             videoUrl: "https://player.vimeo.com/video/1208793357",
           },
           {
             title: "Building Your Chair-Side Presence",
             description:
               "Develop the tone, energy, focus, and room awareness that help clients feel fully seen during every appointment.",
-            duration: "8-10 min",
+            duration: "11 min",
             videoUrl: "https://player.vimeo.com/video/1208793358",
           },
           {
             title: "Rebooking & Retention Habits",
             description:
               "Make rebooking a natural part of the service, handle cancellations professionally, and start tracking retention as a career metric.",
-            duration: "9-11 min",
+            duration: "11 min",
+            videoUrl: "https://player.vimeo.com/video/1212377540",
           },
           {
             title: "Digital Client Communication",
             description:
               "Bring Artisan-level professionalism into DMs, texts, Squire inquiries, expectation-setting, and written communication.",
-            duration: "9-11 min",
+            duration: "11 min",
+            videoUrl: "https://player.vimeo.com/video/1212387564",
           },
           {
             title: "Chapter Assessment",
             description:
               "Complete a mock consultation and scenario responses that test consultation, expectation-setting, communication, and retention judgment.",
-            duration: "6-8 min",
+            duration: "7 min",
+            videoUrl: "https://player.vimeo.com/video/1212385517",
           },
         ],
       },

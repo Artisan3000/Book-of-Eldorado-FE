@@ -10,6 +10,7 @@ type VimeoLessonMapping = {
   label: string;
   vimeoVideoId: string;
   playerUrl: string;
+  duration: string;
 };
 
 const mappings: VimeoLessonMapping[] = [
@@ -21,6 +22,7 @@ const mappings: VimeoLessonMapping[] = [
     label: "Lesson 1.1: The Artisan Consultation Framework",
     vimeoVideoId: "1208793359",
     playerUrl: "https://player.vimeo.com/video/1208793359",
+    duration: "8 min",
   },
   {
     courseSlug: "foundation",
@@ -30,6 +32,7 @@ const mappings: VimeoLessonMapping[] = [
     label: "Lesson 1.2: Managing Difficult Conversations",
     vimeoVideoId: "1208793357",
     playerUrl: "https://player.vimeo.com/video/1208793357",
+    duration: "11 min",
   },
   {
     courseSlug: "foundation",
@@ -39,6 +42,37 @@ const mappings: VimeoLessonMapping[] = [
     label: "Lesson 1.3: Building Your Chair-side Presence",
     vimeoVideoId: "1208793358",
     playerUrl: "https://player.vimeo.com/video/1208793358",
+    duration: "11 min",
+  },
+  {
+    courseSlug: "foundation",
+    moduleSortOrder: 10,
+    lessonSortOrder: 4,
+    expectedTitle: "Rebooking & Retention Habits",
+    label: "Lesson 1.4: Rebooking & Retention Habits",
+    vimeoVideoId: "1212377540",
+    playerUrl: "https://player.vimeo.com/video/1212377540",
+    duration: "11 min",
+  },
+  {
+    courseSlug: "foundation",
+    moduleSortOrder: 10,
+    lessonSortOrder: 5,
+    expectedTitle: "Digital Client Communication",
+    label: "Lesson 1.5: Digital Client Communication",
+    vimeoVideoId: "1212387564",
+    playerUrl: "https://player.vimeo.com/video/1212387564",
+    duration: "11 min",
+  },
+  {
+    courseSlug: "foundation",
+    moduleSortOrder: 10,
+    lessonSortOrder: 6,
+    expectedTitle: "Chapter Assessment",
+    label: "Lesson 1.6: Chapter Assessment",
+    vimeoVideoId: "1212385517",
+    playerUrl: "https://player.vimeo.com/video/1212385517",
+    duration: "7 min",
   },
 ];
 
@@ -116,6 +150,7 @@ async function findUniqueMappedLesson(
       title: true,
       sortOrder: true,
       videoUrl: true,
+      duration: true,
       module: {
         select: {
           id: true,
@@ -174,12 +209,14 @@ async function main() {
         },
         data: {
           videoUrl: mapping.playerUrl,
+          duration: mapping.duration,
         },
         select: {
           id: true,
           title: true,
           sortOrder: true,
           videoUrl: true,
+          duration: true,
           module: {
             select: {
               title: true,
@@ -197,7 +234,7 @@ async function main() {
 
       mappedLessonCount += 1;
       console.log(
-        `Mapped ${mapping.label} (${updatedLesson.id}) -> Vimeo ${mapping.vimeoVideoId} -> ${updatedLesson.videoUrl}`
+        `Mapped ${mapping.label} (${updatedLesson.id}) -> Vimeo ${mapping.vimeoVideoId} -> ${updatedLesson.videoUrl} (${updatedLesson.duration})`
       );
     }
 
@@ -208,17 +245,19 @@ async function main() {
       }))
     );
     const incorrectMappings = verificationRows.filter(
-      ({ mapping, lesson }) => lesson.videoUrl !== mapping.playerUrl
+      ({ mapping, lesson }) =>
+        lesson.videoUrl !== mapping.playerUrl ||
+        lesson.duration !== mapping.duration
     );
 
     if (incorrectMappings.length > 0) {
       throw new Error(
-        `Verification failed: ${incorrectMappings.length} mapped lessons do not match the expected Vimeo URL`
+        `Verification failed: ${incorrectMappings.length} mapped lessons do not match the expected Vimeo URL and duration`
       );
     }
 
     console.log(
-      `Verification complete: ${mappedLessonCount} lessons mapped with normalized Vimeo player URLs.`
+      `Verification complete: ${mappedLessonCount} lessons mapped with normalized Vimeo player URLs and official durations.`
     );
   } finally {
     await prisma.$disconnect();
