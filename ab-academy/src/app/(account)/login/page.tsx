@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
@@ -26,7 +25,11 @@ export default function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({
+          email,
+          password,
+          next: new URLSearchParams(window.location.search).get("next"),
+        }),
       });
 
       const data = await response.json();
@@ -99,10 +102,7 @@ export default function LoginPage() {
       </form>
 
       <p className="text-sm text-gray-600 text-center mt-6">
-        Don’t have an account?{" "}
-        <Link href="/register" className="underline hover:text-black">
-          Sign up
-        </Link>
+        Accounts are provided by an Academy administrator.
       </p>
     </main>
   );

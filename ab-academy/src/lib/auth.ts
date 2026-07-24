@@ -8,6 +8,7 @@ export const roleHomeRoutes: Record<Role, string> = {
   ADMIN: "/admin",
   INSTRUCTOR: "/instructor",
   STUDENT: "/student/dashboard",
+  EMPLOYEE: "/student/dashboard",
   MEMBER: "/member",
 };
 
@@ -35,6 +36,6 @@ export function getRoleHomeRoute(role: Role) {
   return roleHomeRoutes[role] ?? "/student";
 }
 
-export function userHasRole(userRole: Role, allowedRoles: Role[]) {
+export function userHasRole(userRole: Role, allowedRoles: readonly Role[]) {
   return allowedRoles.includes(userRole);
 }

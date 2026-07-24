@@ -1,10 +1,11 @@
 import { PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { requireRole } from "@/lib/current-user";
+import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentDashboardData } from "@/lib/data/student";
 
 export default async function StudentCourses() {
-  const user = await requireRole(["STUDENT", "ADMIN"]);
+  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
   const { courses } = await getStudentDashboardData(user.id);
 
   return (

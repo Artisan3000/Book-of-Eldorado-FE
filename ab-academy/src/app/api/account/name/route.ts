@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/current-user";
+import { requireBrowserMutation } from "@/lib/auth/request-security";
+import { authJson } from "@/lib/auth/responses";
 import { prisma } from "@/lib/prisma";
 
 const MAX_NAME_PART_LENGTH = 80;
@@ -9,10 +10,13 @@ function cleanNamePart(value: unknown) {
 }
 
 export async function PATCH(request: Request) {
+  const requestError = requireBrowserMutation(request);
+  if (requestError) return requestError;
+
   const user = await getCurrentUser();
 
   if (!user) {
-    return NextResponse.json({ error: "You must be logged in." }, { status: 401 });
+    return authJson({ error: "You must be logged in." }, { status: 401 });
   }
 
   const body = await request.json().catch(() => null);
@@ -20,7 +24,7 @@ export async function PATCH(request: Request) {
   const lastName = cleanNamePart(body?.lastName);
 
   if (!firstName || !lastName) {
-    return NextResponse.json(
+    return authJson(
       { error: "First name and last name are required." },
       { status: 400 }
     );
@@ -30,7 +34,7 @@ export async function PATCH(request: Request) {
     firstName.length > MAX_NAME_PART_LENGTH ||
     lastName.length > MAX_NAME_PART_LENGTH
   ) {
-    return NextResponse.json(
+    return authJson(
       { error: "First name and last name must be 80 characters or fewer." },
       { status: 400 }
     );
@@ -51,5 +55,5 @@ export async function PATCH(request: Request) {
     },
   });
 
-  return NextResponse.json({ user: updatedUser });
+  return authJson({ user: updatedUser });
 }
