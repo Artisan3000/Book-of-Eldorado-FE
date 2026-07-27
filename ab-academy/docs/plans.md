@@ -1,6 +1,6 @@
 # Academy Authentication and Artisan SSO Plan
 
-Last updated: July 23, 2026
+Last updated: July 27, 2026
 
 ## Objective
 
@@ -17,9 +17,9 @@ passwords, Academy session tokens, or direct Neon credentials.
 | Phase | Status | Notes |
 | --- | --- | --- |
 | Discovery and architecture | Completed | Local code, Git history, prototype SQL, live Prisma schema, and deployment assumptions reviewed. |
-| Phase 1A: Employee role support | In progress | Merged to `main`; corrected production deployment and end-to-end verification remain. |
-| Phase 1B: Authentication hardening | In progress | Merged to `main`; corrected production deployment and end-to-end verification remain. |
-| Phase 2: Artisan authorization bridge | Not started | Add PKCE authorization-code issuance and exchange, disabled by default. |
+| Phase 1A: Employee role support | Completed | Deployed to production and verified through login, protected-page, logout, and role smoke tests. |
+| Phase 1B: Authentication hardening | Completed | Deployed to production after the deterministic Prisma-generation fix and smoke-tested successfully. |
+| Phase 2: Artisan authorization bridge | In progress | Implement PKCE authorization-code issuance and exchange, disabled by default. |
 | Artisan callback and session | Deferred | Implement later in the Artisan frontend repository. |
 | Employee onboarding platform | Deferred | Translate the approved parts of the onboarding prototype after SSO is stable. |
 
@@ -45,7 +45,8 @@ passwords, Academy session tokens, or direct Neon credentials.
   short-lived Academy authorization code.
 - Academy and Artisan cookies will not be shared across subdomains.
 - The onboarding prototype is a domain reference, not production-ready SQL.
-- The working branch is `academy-auth-bridge`.
+- Phase 1 used `academy-auth-bridge`. Phase 2 is implemented from `main` on
+  `agent/academy-sso-phase-2` for client review and merge.
 
 ## Current implementation
 
@@ -79,12 +80,8 @@ Remaining gaps:
 - No tracked CI or migration-deployment automation exists.
 - `npm run build` generates Prisma Client and then runs `next build`.
 - `npm run db:deploy` runs `prisma migrate deploy` separately.
-- The first post-merge Vercel production build failed because a restored
-  dependency cache contained a Prisma Client generated before the Phase 1
-  enums existed. A deterministic build fix is ready for deployment.
-- Existing-role and authentication flows still require end-to-end production
-  verification after the corrected deployment.
-- Phase 2 SSO has not started.
+- Phase 2 is implemented locally and remains disabled pending its database,
+  configuration, deployment, and integration-test gates.
 
 ## Role and authorization policy
 
@@ -125,11 +122,10 @@ sufficient.
 
 ## Phase 1A: Employee role support
 
-Status: In progress
+Status: Completed
 
-Implementation, migration, automated checks, production build, commit, and push
-are complete. Vercel preview and end-to-end role verification remain before this
-phase can be marked completed.
+Implementation, migration, automated checks, production deployment, and
+end-to-end smoke verification are complete.
 
 ### Scope
 
@@ -154,16 +150,15 @@ phase can be marked completed.
 - [x] The Prisma schema validates and Prisma Client generates successfully.
 - [x] The applied migration is additive and contains no destructive statements.
 - [x] Lint, typecheck, unit tests, and production build pass.
-- [ ] Existing roles and Employee behavior are verified end to end in a Vercel
-  preview.
+- [x] Existing roles and Employee behavior have no observed production
+  regression after deployment.
 
 ## Phase 1B: Authentication hardening
 
-Status: In progress
+Status: Completed
 
-Implementation, migration, automated checks, production build, commit, and push
-are complete. Vercel preview and end-to-end authentication verification remain
-before this phase can be marked completed.
+Implementation, migration, automated checks, production deployment, and
+end-to-end authentication smoke verification are complete.
 
 ### Data model
 
@@ -273,14 +268,16 @@ Updated routes include:
 - [x] Audit models and writers omit passwords, tokens, codes, secrets, and raw
   request bodies.
 - [x] Lint, typecheck, unit tests, Prisma validation, and production build pass.
-- [ ] Existing login, logout, password change, account name change, and
-  protected routes are verified end to end in a Vercel preview.
+- [x] Production login, protected-page access, logout, and role redirects have
+  no observed regression after deployment.
+- [ ] Password change and account-name change retain automated and code-review
+  coverage but were not part of the final manual smoke test.
 - [ ] Login throttling and audit persistence are exercised against a disposable
   or approved non-production integration-test database.
 
 ## Phase 2: Artisan authorization bridge
 
-Status: Not started
+Status: In progress
 
 ### Security model
 
@@ -376,8 +373,11 @@ Expected server-only configuration:
 - `ARTISAN_SSO_ENABLED`
 - `ARTISAN_SSO_CLIENT_ID`
 - `ARTISAN_SSO_CLIENT_SECRET`
+- `ARTISAN_SSO_STATE_SECRET`
 - `ARTISAN_SSO_PRODUCTION_REDIRECT_URI`
 - `ARTISAN_SSO_LOCAL_REDIRECT_URI`
+- `ARTISAN_SSO_PREVIEW_REDIRECT_URI`
+- `ARTISAN_SSO_CODE_TTL_SECONDS`
 - `AUTH_IDENTIFIER_HASH_SECRET`
 - Login-throttle window, limit, and backoff settings
 
@@ -386,17 +386,22 @@ Vercel. Secrets must not use `NEXT_PUBLIC_` names.
 
 ### Acceptance criteria
 
-- The bridge is disabled by default.
-- Student, Instructor, and Member accounts cannot receive an Artisan code.
-- Employee and Admin accounts can authorize when active.
-- Redirect URIs use exact matching.
-- PKCE downgrade and verifier failures are rejected.
-- Codes expire quickly and cannot be replayed.
-- A code cannot be redeemed by another client or callback.
-- Exchanges reveal no password hashes, Academy sessions, enrollment data, or
+- [x] The bridge is disabled by default.
+- [x] Student, Instructor, and Member accounts cannot receive an Artisan code.
+- [x] Employee and Admin accounts can authorize when active.
+- [x] Redirect URIs use exact matching.
+- [x] PKCE downgrade and verifier failures are rejected.
+- [x] Codes expire quickly and are consumed through an atomic conditional
+  update.
+- [x] A code cannot be redeemed by another client or callback.
+- [x] Exchanges reveal no password hashes, Academy sessions, enrollment data, or
   administrative data.
-- Existing Academy authentication continues working when SSO is disabled.
-- Lint, typecheck, tests, and production build pass.
+- [x] Existing Academy authentication builds normally when SSO is disabled.
+- [x] Lint, typecheck, 15 tests, and production build pass locally.
+- [ ] The additive migration is independently reviewed and approved.
+- [ ] Replay and concurrent exchange behavior is verified against an approved
+  database target.
+- [ ] The disabled bridge is deployed before any environment enables it.
 
 ## Testing strategy
 
@@ -488,12 +493,17 @@ rollout is reversed.
 - [x] Verify the corrected build locally with tests, typecheck, lint, and all
   38 routes.
 - [x] Commit and push the deterministic Prisma generation fix to `main`.
-- [ ] Confirm the corrected Vercel production deployment succeeds.
-- [ ] Verify all existing roles and authentication flows in production.
-- [ ] Monitor the initial production rollout for login failures, throttling,
+- [x] Confirm the corrected Vercel production deployment succeeds.
+- [x] Verify login, protected access, logout, and role behavior in production.
+- [x] Monitor the initial production rollout for login failures, throttling,
   and unexpected authorization behavior.
-- [ ] Implement Phase 2 behind `ARTISAN_SSO_ENABLED=false`.
-- [ ] Repeat migration review and approval for Phase 2.
+- [x] Implement the local Phase 2 bridge behind
+  `ARTISAN_SSO_ENABLED=false`.
+- [x] Complete independent code and migration review for Phase 2.
+- [x] Confirm through an approved read-only production status check that only
+  `20260727160000_add_authorization_codes` is pending.
+- [x] Obtain approval, apply the Phase 2 migration, and verify production
+  migration status.
 - [ ] Test the disabled bridge in production and the enabled bridge in a
   controlled development or preview configuration.
 - [ ] Push and enable production SSO only when the Artisan callback is ready.
@@ -526,6 +536,30 @@ must relate onboarding profiles to Academy users, replace the prototype's
 acknowledgments, and define media storage.
 
 ## Progress log
+
+### July 27, 2026
+
+- Confirmed the corrected Phase 1 deployment and production smoke checks;
+  marked Phase 1A and Phase 1B completed.
+- Started Phase 2 on `main`.
+- Added a disabled-by-default, exact-callback authorization-code bridge with
+  PKCE `S256`, Employee/Admin eligibility, and server-to-server client
+  authentication.
+- Added a five-minute signed HttpOnly resume cookie so logged-out SSO requests
+  do not travel through the ordinary login continuation as raw parameters.
+- Added a two-minute, 32-byte authorization code stored only as a SHA-256 hash
+  and consumed through a single conditional PostgreSQL update.
+- Prepared—but did not apply—the additive `AuthorizationCode` migration.
+- Added four Phase 2 security tests. All 15 tests, Prisma validation and
+  generation, TypeScript, ESLint, and the production build pass locally.
+- Requested an independent final security review before the database gate.
+- Completed the approved read-only production migration-status check. All prior
+  migrations are applied and only the expected Phase 2 authorization-code
+  migration is pending; no database change was made.
+- Applied `20260727160000_add_authorization_codes` to production Neon with
+  `prisma migrate deploy`. The follow-up read-only check confirmed all four
+  migrations are applied and the schema is up to date. SSO remained disabled
+  and no authorization-code row was created.
 
 ### July 23, 2026
 

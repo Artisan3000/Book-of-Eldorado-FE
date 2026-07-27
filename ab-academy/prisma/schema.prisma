@@ -62,9 +62,27 @@ model User {
   sessions    Session[]
   enrollments Enrollment[]
   authEvents  AuthEvent[]
+  authorizationCodes AuthorizationCode[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AuthorizationCode {
+  id            String   @id @default(cuid())
+  codeHash      String   @unique
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId      String
+  redirectUri   String
+  codeChallenge String
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt])
+  @@index([usedAt, expiresAt])
 }
 
 model LoginThrottle {
