@@ -4,6 +4,7 @@ import Tabs from "@/app/components/Tabs";
 import { requireRole } from "@/lib/current-user";
 import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentCourseDetail } from "@/lib/data/student";
+import { isPdfHref } from "@/lib/lessons/lesson-content";
 
 export default async function CourseDetailPage({
   params,
@@ -147,9 +148,12 @@ export default async function CourseDetailPage({
                         {resource.href ? (
                           <a
                             href={resource.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="font-medium text-black underline underline-offset-4 hover:text-gray-600"
                           >
                             {resource.title}
+                            {isPdfHref(resource.href) && " (PDF)"}
                           </a>
                         ) : (
                           <p className="font-medium text-black">

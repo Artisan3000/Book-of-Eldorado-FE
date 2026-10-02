@@ -10,7 +10,7 @@ import {
 import Link from "next/link";
 import { useCallback, useState, type ReactNode } from "react";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
-import type { LessonContentKind } from "@/lib/lessons/lesson-content";
+import { isPdfHref, type LessonContentKind } from "@/lib/lessons/lesson-content";
 import TextLessonProgress from "./TextLessonProgress";
 
 type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
@@ -189,9 +189,12 @@ export default function StudentLessonExperience({
               {lesson.moduleResource.href ? (
                 <a
                   href={lesson.moduleResource.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="block text-sm underline underline-offset-4 hover:text-gray-600"
                 >
                   {lesson.moduleResource.title}
+                  {isPdfHref(lesson.moduleResource.href) && " (PDF)"}
                 </a>
               ) : (
                 <>

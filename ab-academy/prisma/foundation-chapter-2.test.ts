@@ -63,6 +63,7 @@ test("the import updates only the description and resource fields, never the tit
   assert.deepEqual(getChapter2ModuleUpdate(legacyModule), {
     description: chapter2Module.description,
     resourceTitle: chapter2Module.resourceTitle,
+    resourceUrl: chapter2Module.resourceUrl,
   });
   assert.ok(!("title" in chapter2Module));
   assert.deepEqual(getChapter2ModuleUpdate({ ...legacyModule, ...chapter2Module }), {});

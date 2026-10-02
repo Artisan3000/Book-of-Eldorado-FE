@@ -51,7 +51,7 @@ export function getReadingTimeLabel(markdown: string) {
   return `${minutes} min read`;
 }
 
-// Resource links may point at an in-app route (e.g. a future logged-in-only
+// Resource links may point at an in-app route (e.g. the logged-in-only
 // workbook download) or an https URL. Anything else is not rendered as a link.
 export function getSafeResourceHref(url: string | null | undefined) {
   const value = url?.trim();
@@ -71,4 +71,8 @@ export function getSafeResourceHref(url: string | null | undefined) {
   } catch {
     return null;
   }
+}
+
+export function isPdfHref(href: string) {
+  return href.split(/[?#]/, 1)[0].toLowerCase().endsWith(".pdf");
 }

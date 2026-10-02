@@ -32,9 +32,12 @@ Text lesson `duration` is computed from the Markdown body at 200 words per minut
 
 ## Workbook
 
-The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceUrl`, shown on each Chapter 2 lesson page and in the course Resources tab. It is not a lesson.
+The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceUrl`, shown on each Chapter 2 lesson page and in the course Resources tab (opens in a new tab, labelled "(PDF)"). It is not a lesson.
 
-`resourceUrl` stays `null` until the workbook PDF is served from a logged-in-only Academy route. While it is null, students see the title with "available to download soon". Never store the editable Google Docs URL. Links are only rendered for in-app paths or `https` URLs (`getSafeResourceHref`).
+- **Source:** `prisma/content/foundation-chapter-2/workbook.md`, a word-for-word export of the "Artisan Academy — Chapter 2 Workbook" Google Doc. Never link students to the Google Doc.
+- **PDF:** `course-resources/foundation/chapter-2-workbook.pdf`, built with `npx tsx scripts/build-chapter-2-workbook.ts` (local Chrome). The layout adds writing lines after prompts and starts each lesson on a new page; `scripts/workbook-layout.test.ts` checks the wording is unchanged. Rebuild and commit the PDF whenever the source changes.
+- **Route:** `GET /student/courses/foundation/resources/chapter-2-workbook.pdf` (`src/app/(account)/student/courses/[slug]/resources/[file]/route.ts`). `proxy.ts` sends visitors without a session to `/login?next=…`; the route then requires a student-experience role (403 otherwise) and an active or completed enrollment in the published course whose visible module links to the file (404 otherwise). Files are registered in `src/lib/course-resources.ts` and traced into the function via `outputFileTracingIncludes` in `next.config.ts`; they are deliberately not in `public/`.
+- `chapter2Module.resourceUrl` points at the route, so the import sets it. When the lessons already match the content files, the import updates only module fields and leaves lessons and progress untouched.
 
 ## Content files
 

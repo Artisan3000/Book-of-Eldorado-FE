@@ -25,6 +25,8 @@ import { isVisibleFoundationModuleTitle } from "../src/lib/data/course-visibilit
 // - never changes the module title (see prisma/rename-chapter-2-module.ts);
 // - aborts without changes if any LessonProgress exists on the lessons it would replace;
 // - preserves the module id and sortOrder;
+// - when the lessons already match, updates only the module fields and keeps
+//   lessons and progress untouched;
 // - is a no-op when the database already matches the content files.
 
 type ExistingModule = NonNullable<Awaited<ReturnType<typeof findChapter2Module>>>;
@@ -103,9 +105,8 @@ async function findChapter2Module(client: Prisma.TransactionClient | PrismaClien
   return modules[0];
 }
 
-function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
+function lessonsMatch(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
   return (
-    Object.keys(getChapter2ModuleUpdate(existing)).length === 0 &&
     existing.lessons.length === lessons.length &&
     lessons.every((lesson, index) => {
       const current = existing.lessons[index];
@@ -122,12 +123,23 @@ function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
   );
 }
 
-function assertExpectedExistingState(existing: ExistingModule) {
+function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
+  return (
+    Object.keys(getChapter2ModuleUpdate(existing)).length === 0 &&
+    lessonsMatch(existing, lessons)
+  );
+}
+
+function assertModuleTitleIsVisible(existing: ExistingModule) {
   if (!isVisibleFoundationModuleTitle(existing.title)) {
     throw new Error(
       `Unexpected Chapter 2 module title "${existing.title}": it is not in the Foundation visibility allow-list.`
     );
   }
+}
+
+function assertExpectedExistingState(existing: ExistingModule) {
+  assertModuleTitleIsVisible(existing);
 
   const titles = existing.lessons.map((lesson) => lesson.title);
 
@@ -203,7 +215,37 @@ async function replaceChapter2Lessons(
   );
 }
 
-function printPlan(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
+// When the lessons already match the content files, only the module fields
+// change and the lessons (and any student progress on them) are untouched.
+async function updateChapter2ModuleFields(
+  prisma: PrismaClient,
+  moduleId: string,
+  lessons: LoadedChapter2Lesson[]
+) {
+  await prisma.$transaction(
+    async (tx) => {
+      const current = await findChapter2Module(tx);
+
+      if (current.id !== moduleId || !lessonsMatch(current, lessons)) {
+        throw new Error("Chapter 2 changed during import.");
+      }
+
+      assertModuleTitleIsVisible(current);
+
+      await tx.module.update({
+        where: { id: moduleId },
+        data: getChapter2ModuleUpdate(current),
+      });
+    },
+    { isolationLevel: "Serializable", timeout: 30_000 }
+  );
+}
+
+function printPlan(
+  existing: ExistingModule,
+  lessons: LoadedChapter2Lesson[],
+  replaceLessons: boolean
+) {
   const moduleUpdate = getChapter2ModuleUpdate(existing);
 
   console.log(`\nPlan (one Serializable transaction):`);
@@ -217,6 +259,14 @@ function printPlan(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
         ? `  update ${key}: ${JSON.stringify(existing[key])} -> ${JSON.stringify(chapter2Module[key])}`
         : `  keep   ${key}: ${JSON.stringify(existing[key])}`
     );
+  }
+
+  if (!replaceLessons) {
+    const progressRows = existing.lessons.reduce((sum, lesson) => sum + lesson._count.progress, 0);
+    console.log(
+      `\nLessons: all ${existing.lessons.length} already match the content files; unchanged (${progressRows} progress rows kept).`
+    );
+    return;
   }
 
   console.log(`\nDelete ${existing.lessons.length} lessons:`);
@@ -258,16 +308,26 @@ async function main() {
       return;
     }
 
-    assertExpectedExistingState(existing);
+    const replaceLessons = !lessonsMatch(existing, lessons);
 
-    printPlan(existing, lessons);
+    if (replaceLessons) {
+      assertExpectedExistingState(existing);
+    } else {
+      assertModuleTitleIsVisible(existing);
+    }
+
+    printPlan(existing, lessons, replaceLessons);
 
     if (!apply) {
       console.log("\nDry run only. Re-run with --apply to write.");
       return;
     }
 
-    await replaceChapter2Lessons(prisma, existing.id, lessons);
+    if (replaceLessons) {
+      await replaceChapter2Lessons(prisma, existing.id, lessons);
+    } else {
+      await updateChapter2ModuleFields(prisma, existing.id, lessons);
+    }
 
     const verified = await findChapter2Module(prisma);
 
@@ -281,7 +341,9 @@ async function main() {
     }
 
     console.log(
-      `Import complete: module ${verified.id} now has ${verified.lessons.length} text lessons.`
+      replaceLessons
+        ? `Import complete: module ${verified.id} now has ${verified.lessons.length} text lessons.`
+        : `Import complete: module ${verified.id} fields updated; lessons unchanged.`
     );
   } finally {
     await prisma.$disconnect();

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { CHAPTER_2_WORKBOOK_HREF } from "../src/lib/course-resources";
 import {
   getReadingTimeLabel,
   isPlaceholderLessonBody,
@@ -31,9 +32,8 @@ export const chapter2Module = {
   description:
     "The core of your apprenticeship. Turn consultations into clear haircut plans, build clipper, scissor, texture, and beard work through supervised services, choose and explain products with intention, and start building a returning clientele.",
   resourceTitle: "Chapter 2 Companion Workbook",
-  // Stays null until the workbook PDF is served from a logged-in-only Academy
-  // route. Never point this at the editable Google Doc.
-  resourceUrl: null as string | null,
+  // The logged-in-only PDF route. Never point this at the editable Google Doc.
+  resourceUrl: CHAPTER_2_WORKBOOK_HREF as string | null,
 };
 
 export const chapter2Lessons: readonly Chapter2LessonMetadata[] = [
