@@ -1,0 +1,1 @@
+<!-- PLACEHOLDER: Replace this entire file with The Artisan Client-Building Method from Charlie's Oct. 1 Basecamp post (Attract, Convert, Retain, Generate Referrals, including the supervised-model invitation script and the rebooking script), with apprentice-specific names removed. The page stays hidden while this marker is present. -->

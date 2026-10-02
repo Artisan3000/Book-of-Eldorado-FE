@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --conditions=react-server --test src/lib/auth/security.test.ts src/lib/roles.test.ts src/lib/sso/sso.test.ts src/lib/lessons/lesson-content.test.ts src/lib/data/course-visibility.test.ts prisma/foundation-chapter-2.test.ts scripts/workbook-layout.test.ts src/lib/course-resources.test.ts",
+    "test": "tsx --conditions=react-server --test src/lib/auth/security.test.ts src/lib/roles.test.ts src/lib/sso/sso.test.ts src/lib/lessons/lesson-content.test.ts src/lib/data/course-visibility.test.ts prisma/foundation-chapter-2.test.ts scripts/workbook-layout.test.ts src/lib/course-resources.test.ts src/lib/course-references.test.ts",
     "db:generate": "prisma generate",
     "db:deploy": "prisma migrate deploy",
     "db:migrate": "prisma migrate dev",

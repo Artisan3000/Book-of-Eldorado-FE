@@ -48,7 +48,7 @@ test("Chapter 2 lesson bodies are real manuscript content without a title headin
 test("web lessons stay read-only: no assignment lists, a closing workbook handoff", () => {
   for (const lesson of loadChapter2Lessons()) {
     assert.doesNotMatch(lesson.body, /^## Practical assignment$/m, lesson.file);
-    assert.match(lesson.body, /^## Workbook handoff\n\n(?:(?!^## ).)+$/ms, lesson.file);
+    assert.ok(lesson.body.split(/^## /m).at(-1)?.startsWith("Workbook handoff\n"), lesson.file);
   }
 });
 

@@ -141,28 +141,41 @@ export default async function CourseDetailPage({
                   </h3>
                 </div>
                 {course.resources.length > 0 ? (
-                  <ul className="mt-4 space-y-3">
+                  <ul className="mt-4 space-y-5">
                     {course.resources.map((resource) => (
-                      <li key={resource.id} className="text-sm">
+                      <li key={resource.id} className="space-y-2 text-sm">
                         <p className="text-gray-600">{resource.moduleTitle}</p>
-                        {resource.href ? (
-                          <a
-                            href={resource.href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-medium text-black underline underline-offset-4 hover:text-gray-600"
-                          >
-                            {resource.title}
-                            {isPdfHref(resource.href) && " (PDF)"}
-                          </a>
-                        ) : (
-                          <p className="font-medium text-black">
-                            {resource.title}{" "}
-                            <span className="font-normal text-gray-600">
-                              (available to download soon)
-                            </span>
-                          </p>
-                        )}
+                        {resource.download &&
+                          (resource.download.href ? (
+                            <a
+                              href={resource.download.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block font-medium text-black underline underline-offset-4 hover:text-gray-600"
+                            >
+                              {resource.download.title}
+                              {isPdfHref(resource.download.href) && " (PDF)"}
+                            </a>
+                          ) : (
+                            <p className="font-medium text-black">
+                              {resource.download.title}{" "}
+                              <span className="font-normal text-gray-600">
+                                (available to download soon)
+                              </span>
+                            </p>
+                          ))}
+                        {resource.references.map((reference) => (
+                          <div key={reference.slug}>
+                            <Link
+                              href={reference.href}
+                              className="font-medium text-black underline underline-offset-4 hover:text-gray-600"
+                            >
+                              {reference.title}
+                            </Link>
+                            <span className="text-gray-600"> · Reference</span>
+                            <p className="text-gray-600">{reference.summary}</p>
+                          </div>
+                        ))}
                       </li>
                     ))}
                   </ul>

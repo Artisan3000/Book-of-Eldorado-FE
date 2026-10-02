@@ -4,10 +4,11 @@ Chapter 2 (Foundation module `sortOrder = 20`) replaces the obsolete Business & 
 
 ## Chapter title
 
-The module keeps its current production title, **Business & Branding Essentials**, until a final title is approved. "Haircut Development, Product Knowledge & Clientele Building" is only the manuscript's working title. The content import never changes the title. To rename later:
+The approved title is **Haircut Development & Product Knowledge** (`FOUNDATION_CHAPTER_2_TITLE`). Production still has **Business & Branding Essentials** until it is renamed; both are allow-listed. The content import never changes the title. To rename (rehearsal done; production pending):
 
-1. Add the approved title to the Foundation allow-list in `src/lib/data/course-visibility.ts` and deploy (a title missing from the list hides the chapter from students).
-2. `npx tsx prisma/rename-chapter-2-module.ts --title "<title>"` (dry run), then add `--apply`.
+1. Deploy the code first (a title missing from the allow-list in `src/lib/data/course-visibility.ts` hides the chapter from students).
+2. `npx tsx prisma/rename-chapter-2-module.ts --title "Haircut Development & Product Knowledge"` (dry run), then add `--apply`.
+3. Afterwards, remove `LEGACY_FOUNDATION_CHAPTER_2_TITLE` from the allow-list.
 
 ## Rendering rule
 
@@ -39,7 +40,16 @@ The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceU
 - **Route:** `GET /student/courses/foundation/resources/chapter-2-workbook.pdf` (`src/app/(account)/student/courses/[slug]/resources/[file]/route.ts`). `proxy.ts` sends visitors without a session to `/login?next=…`; the route then requires a student-experience role (403 otherwise) and an active or completed enrollment in the published course whose visible module links to the file (404 otherwise). Files are registered in `src/lib/course-resources.ts` and traced into the function via `outputFileTracingIncludes` in `next.config.ts`; they are deliberately not in `public/`.
 - `chapter2Module.resourceUrl` points at the route, so the import sets it. When the lessons already match the content files, the import updates only module fields and leaves lessons and progress untouched.
 
-## Content files
+## Chapter references
+
+Read-only reference pages (not lessons) live at `/student/courses/[slug]/reference/[referenceSlug]`. They are Markdown files in `course-resources/<course>/references/`, registered in `src/lib/course-references.ts` with the chapter's `Module.sortOrder`. Because they are not in the `Lesson` table they never affect lesson numbering, slugs, or progress. They are listed in the course Resources tab and the chapter's lesson sidebars, and use the course page's access rules.
+
+- **Artisan Core Product Guide** (Chapter 2, published): Charlie's guide from the Apprentice Curriculum, with the apprentice's name removed. The workbook's reference section is the printable version.
+- **The Artisan Client-Building Method** (Chapter 1, draft, hidden): placeholder until Charlie's Oct. 1 Basecamp text is supplied.
+
+To publish a reference, replace its file's placeholder and set `published: true`.
+
+## Lesson content files
 
 - Metadata (titles, order, optional descriptions, module description, resource): `prisma/foundation-chapter-2.ts`
 - Lesson bodies: `prisma/content/foundation-chapter-2/2-XX-*.md`, one file per lesson

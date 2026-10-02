@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/current-user";
 import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentLessonDetail } from "@/lib/data/student";
-import LessonMarkdown from "./LessonMarkdown";
+import LessonMarkdown from "@/app/components/LessonMarkdown";
 import StudentLessonExperience from "./StudentLessonExperience";
 
 export default async function StudentLessonPage({
@@ -28,6 +28,7 @@ export default async function StudentLessonPage({
           contentKind: lesson.contentKind,
           moduleTitle: lesson.moduleTitle,
           moduleResource: lesson.moduleResource,
+          moduleReferences: lesson.moduleReferences,
           progressStatus: lesson.progressStatus,
           lastPositionSeconds: lesson.lastPositionSeconds,
         }}

@@ -38,6 +38,7 @@ type StudentLessonExperienceProps = {
       title: string;
       href: string | null;
     } | null;
+    moduleReferences: { slug: string; title: string; href: string }[];
     progressStatus: LessonProgressStatus;
     lastPositionSeconds: number;
   };
@@ -181,12 +182,15 @@ export default function StudentLessonExperience({
             </p>
           </div>
 
-          {lesson.moduleResource && (
-            <div className="border border-gray-300 p-5">
-              <h2 className="mb-2 inline-flex items-center gap-2 font-semibold">
-                <FileText className="h-4 w-4" /> Chapter Resource
+          {(lesson.moduleResource || lesson.moduleReferences.length > 0) && (
+            <div className="space-y-2 border border-gray-300 p-5">
+              <h2 className="inline-flex items-center gap-2 font-semibold">
+                <FileText className="h-4 w-4" />
+                {lesson.moduleResource && lesson.moduleReferences.length === 0
+                  ? "Chapter Resource"
+                  : "Chapter Resources"}
               </h2>
-              {lesson.moduleResource.href ? (
+              {lesson.moduleResource && (lesson.moduleResource.href ? (
                 <a
                   href={lesson.moduleResource.href}
                   target="_blank"
@@ -205,7 +209,16 @@ export default function StudentLessonExperience({
                     Available to download soon.
                   </p>
                 </>
-              )}
+              ))}
+              {lesson.moduleReferences.map((reference) => (
+                <Link
+                  key={reference.slug}
+                  href={reference.href}
+                  className="block text-sm underline underline-offset-4 hover:text-gray-600"
+                >
+                  {reference.title}
+                </Link>
+              ))}
             </div>
           )}
 
