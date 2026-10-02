@@ -3,6 +3,9 @@ import test from "node:test";
 import {
   chapter2Lessons,
   chapter2Module,
+  getChapter2ModuleUpdate,
+  getExistingChapter2LessonSet,
+  legacyChapter2,
   loadChapter2Lessons,
 } from "./foundation-chapter-2";
 
@@ -46,5 +49,33 @@ test("the workbook is a chapter resource, not a Google Docs link", () => {
   assert.ok(chapter2Module.resourceTitle);
   assert.ok(
     chapter2Module.resourceUrl === null || chapter2Module.resourceUrl.startsWith("/")
+  );
+});
+
+test("the import updates only the description and resource fields, never the title", () => {
+  const legacyModule = {
+    title: "Business & Branding Essentials",
+    description: "Understand how the shop makes money.",
+    resourceTitle: null,
+    resourceUrl: null,
+  };
+
+  assert.deepEqual(getChapter2ModuleUpdate(legacyModule), {
+    description: chapter2Module.description,
+    resourceTitle: chapter2Module.resourceTitle,
+  });
+  assert.ok(!("title" in chapter2Module));
+  assert.deepEqual(getChapter2ModuleUpdate({ ...legacyModule, ...chapter2Module }), {});
+});
+
+test("the import only replaces the obsolete or the approved Chapter 2 lessons", () => {
+  assert.equal(getExistingChapter2LessonSet(legacyChapter2.lessonTitles), "legacy");
+  assert.equal(
+    getExistingChapter2LessonSet(chapter2Lessons.map((lesson) => lesson.title)),
+    "current"
+  );
+  assert.equal(
+    getExistingChapter2LessonSet(legacyChapter2.lessonTitles.slice(1)),
+    "unexpected"
   );
 });

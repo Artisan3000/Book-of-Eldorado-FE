@@ -1,6 +1,13 @@
 # Foundation Chapter 2: Text Lessons
 
-Chapter 2, **Haircut Development, Product Knowledge & Clientele Building**, replaces the obsolete **Business & Branding Essentials** module (Foundation module `sortOrder = 20`). It has ten readable lessons and one companion workbook. Chapter 1 continues to use Vimeo lessons unchanged.
+Chapter 2 (Foundation module `sortOrder = 20`) replaces the obsolete Business & Branding lessons with ten readable lessons and one companion workbook. Chapter 1 continues to use Vimeo lessons unchanged.
+
+## Chapter title
+
+The module keeps its current production title, **Business & Branding Essentials**, until a final title is approved. "Haircut Development, Product Knowledge & Clientele Building" is only the manuscript's working title. The content import never changes the title. To rename later:
+
+1. Add the approved title to the Foundation allow-list in `src/lib/data/course-visibility.ts` and deploy (a title missing from the list hides the chapter from students).
+2. `npx tsx prisma/rename-chapter-2-module.ts --title "<title>"` (dry run), then add `--apply`.
 
 ## Rendering rule
 
@@ -37,7 +44,7 @@ The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceU
 The checked-in files are placeholders containing `<!-- PLACEHOLDER`. To load the approved manuscript:
 
 1. Replace each file's entire contents with that lesson's approved Markdown. Do not repeat the lesson title as a heading, because the page already renders it. Any `#` heading renders as a section heading.
-2. Set `chapter2Module.description` (required) and, optionally, each lesson's `description` in `prisma/foundation-chapter-2.ts`.
+2. Set `chapter2Module.description` (required; approved Oct. 2026) and, optionally, each lesson's `description` in `prisma/foundation-chapter-2.ts`.
 3. Run `npm test` and `npm run build`.
 
 ## Import (not yet run against any database)
@@ -53,7 +60,9 @@ npx tsx prisma/import-chapter-2-text-lessons.ts --apply  # one Serializable tran
 
 Before touching the database, the script refuses to run if any lesson body is a placeholder or empty, or if the module description is missing. It then:
 
-- requires exactly one Foundation module at `sortOrder = 20`, titled either the obsolete or the new Chapter 2 title (the obsolete module must contain exactly the seven expected lessons);
+- requires exactly one Foundation module at `sortOrder = 20` whose title is in the visibility allow-list, containing either exactly the seven obsolete lessons or the ten approved lessons from an earlier import;
+- prints the full plan: module fields to update or keep, lessons to delete (with progress counts), lessons to create;
+- updates only `description`, `resourceTitle` and `resourceUrl` on the module, keeping its id, `sortOrder` and title;
 - aborts without changes if any `LessonProgress` exists on the lessons it would replace;
 - deletes and recreates the lessons inside the transaction, keeping the module id and `sortOrder`;
 - is a no-op when the database already matches the content files;
@@ -63,8 +72,8 @@ Before touching the database, the script refuses to run if any lesson body is a 
 
 1. Rehearse on a Neon branch created from production: `prisma migrate deploy`, import dry run, `--apply`, then smoke tests.
 2. Production: read-only checks, then `prisma migrate deploy` (migration `20260925120000_add_text_lesson_content`, additive nullable columns). This must happen before the code deploys, because the new code selects the new columns.
-3. Deploy the code. Both Chapter 2 titles are allow-listed in `src/lib/data/course-visibility.ts`.
+3. Deploy the code.
 4. Run the import dry run, then `--apply`, then verify read-only.
-5. In a follow-up, remove `LEGACY_FOUNDATION_CHAPTER_2_TITLE` from the visibility allow-list.
+5. Once the final title is approved, rename with `prisma/rename-chapter-2-module.ts` (see Chapter title), then remove unused titles from the visibility allow-list.
 
 Each database step requires explicit approval, per [`plans.md`](plans.md#database-safety-and-migration-policy).

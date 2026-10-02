@@ -1,14 +1,15 @@
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
 import { PrismaClient, type Prisma } from "@prisma/client";
 import {
   CHAPTER_2_MODULE_SORT_ORDER,
   FOUNDATION_COURSE_SLUG,
   chapter2Module,
-  legacyChapter2,
+  getChapter2ModuleUpdate,
+  getExistingChapter2LessonSet,
   loadChapter2Lessons,
   type LoadedChapter2Lesson,
 } from "./foundation-chapter-2";
+import { loadDotEnv } from "./load-dot-env";
+import { isVisibleFoundationModuleTitle } from "../src/lib/data/course-visibility";
 
 // Replaces the Foundation Chapter 2 lessons with the approved text lessons.
 //
@@ -19,45 +20,14 @@ import {
 // Guarantees:
 // - refuses placeholder/empty manuscript files and a missing module description;
 // - only touches the Foundation module at sortOrder 20, and only when its title
-//   is the obsolete or the new Chapter 2 title;
+//   is allow-listed in src/lib/data/course-visibility.ts and its lessons are the obsolete seven or the
+//   approved ten;
+// - never changes the module title (see prisma/rename-chapter-2-module.ts);
 // - aborts without changes if any LessonProgress exists on the lessons it would replace;
 // - preserves the module id and sortOrder;
 // - is a no-op when the database already matches the content files.
 
 type ExistingModule = NonNullable<Awaited<ReturnType<typeof findChapter2Module>>>;
-
-function loadDotEnv() {
-  const envPath = join(process.cwd(), ".env");
-
-  if (!existsSync(envPath)) {
-    return;
-  }
-
-  for (const line of readFileSync(envPath, "utf8").split(/\r?\n/)) {
-    const match = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
-
-    if (!match || match[1].startsWith("#")) {
-      continue;
-    }
-
-    const [, key, rawValue] = match;
-
-    if (process.env[key] !== undefined) {
-      continue;
-    }
-
-    let value = rawValue.trim();
-
-    if (
-      (value.startsWith("\"") && value.endsWith("\"")) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
-    }
-
-    process.env[key] = value;
-  }
-}
 
 function assertContentIsImportable(lessons: LoadedChapter2Lesson[]) {
   const problems: string[] = [];
@@ -135,10 +105,7 @@ async function findChapter2Module(client: Prisma.TransactionClient | PrismaClien
 
 function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
   return (
-    existing.title === chapter2Module.title &&
-    existing.description === chapter2Module.description &&
-    existing.resourceTitle === chapter2Module.resourceTitle &&
-    existing.resourceUrl === chapter2Module.resourceUrl &&
+    Object.keys(getChapter2ModuleUpdate(existing)).length === 0 &&
     existing.lessons.length === lessons.length &&
     lessons.every((lesson, index) => {
       const current = existing.lessons[index];
@@ -156,17 +123,17 @@ function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
 }
 
 function assertExpectedExistingState(existing: ExistingModule) {
-  if (existing.title === legacyChapter2.title) {
-    const titles = existing.lessons.map((lesson) => lesson.title);
-
-    if (titles.join("\n") !== legacyChapter2.lessonTitles.join("\n")) {
-      throw new Error(
-        `Module "${existing.title}" does not contain the expected obsolete lessons. Found:\n- ${titles.join("\n- ")}`
-      );
-    }
-  } else if (existing.title !== chapter2Module.title) {
+  if (!isVisibleFoundationModuleTitle(existing.title)) {
     throw new Error(
-      `Unexpected Chapter 2 module title "${existing.title}". Expected "${legacyChapter2.title}" or "${chapter2Module.title}".`
+      `Unexpected Chapter 2 module title "${existing.title}": it is not in the Foundation visibility allow-list.`
+    );
+  }
+
+  const titles = existing.lessons.map((lesson) => lesson.title);
+
+  if (getExistingChapter2LessonSet(titles) === "unexpected") {
+    throw new Error(
+      `Module "${existing.title}" contains neither the obsolete nor the approved Chapter 2 lessons. Found:\n- ${titles.join("\n- ")}`
     );
   }
 
@@ -225,18 +192,44 @@ async function replaceChapter2Lessons(
         })),
       });
 
-      await tx.module.update({
-        where: { id: moduleId },
-        data: {
-          title: chapter2Module.title,
-          description: chapter2Module.description,
-          resourceTitle: chapter2Module.resourceTitle,
-          resourceUrl: chapter2Module.resourceUrl,
-        },
-      });
+      // Content fields only: the title, id and sortOrder are left as they are.
+      const moduleUpdate = getChapter2ModuleUpdate(current);
+
+      if (Object.keys(moduleUpdate).length > 0) {
+        await tx.module.update({ where: { id: moduleId }, data: moduleUpdate });
+      }
     },
     { isolationLevel: "Serializable", timeout: 30_000 }
   );
+}
+
+function printPlan(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
+  const moduleUpdate = getChapter2ModuleUpdate(existing);
+
+  console.log(`\nPlan (one Serializable transaction):`);
+  console.log(
+    `\nModule ${existing.id}: title "${existing.title}" and sortOrder ${existing.sortOrder} unchanged.`
+  );
+
+  for (const key of Object.keys(chapter2Module) as (keyof typeof chapter2Module)[]) {
+    console.log(
+      key in moduleUpdate
+        ? `  update ${key}: ${JSON.stringify(existing[key])} -> ${JSON.stringify(chapter2Module[key])}`
+        : `  keep   ${key}: ${JSON.stringify(existing[key])}`
+    );
+  }
+
+  console.log(`\nDelete ${existing.lessons.length} lessons:`);
+  for (const lesson of existing.lessons) {
+    console.log(
+      `  ${lesson.sortOrder}. ${lesson.id} "${lesson.title}" (progress rows: ${lesson._count.progress})`
+    );
+  }
+
+  console.log(`\nCreate ${lessons.length} text lessons:`);
+  for (const lesson of lessons) {
+    console.log(`  2.${lesson.sortOrder} "${lesson.title}" (${lesson.duration}, ${lesson.body.length} chars)`);
+  }
 }
 
 async function main() {
@@ -267,10 +260,10 @@ async function main() {
 
     assertExpectedExistingState(existing);
 
+    printPlan(existing, lessons);
+
     if (!apply) {
-      console.log(
-        `Dry run: would replace ${existing.lessons.length} lessons with ${lessons.length} text lessons and update module ${existing.id}. Re-run with --apply to write.`
-      );
+      console.log("\nDry run only. Re-run with --apply to write.");
       return;
     }
 
@@ -278,7 +271,12 @@ async function main() {
 
     const verified = await findChapter2Module(prisma);
 
-    if (verified.id !== existing.id || !isUpToDate(verified, lessons)) {
+    if (
+      verified.id !== existing.id ||
+      verified.title !== existing.title ||
+      verified.sortOrder !== existing.sortOrder ||
+      !isUpToDate(verified, lessons)
+    ) {
       throw new Error("Verification failed: Chapter 2 does not match the content files after import.");
     }
 
