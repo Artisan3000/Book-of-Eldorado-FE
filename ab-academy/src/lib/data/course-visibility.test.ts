@@ -14,7 +14,7 @@ test("Foundation shows Chapter 1 and the new Chapter 2", () => {
   assert.deepEqual(getVisibleCourseModules("foundation", modules), modules);
 });
 
-test("the current production Chapter 2 title stays visible", () => {
+test("the legacy Chapter 2 title stays visible until production is renamed", () => {
   const modules = [chapter1, { title: LEGACY_FOUNDATION_CHAPTER_2_TITLE }];
 
   assert.deepEqual(getVisibleCourseModules("foundation", modules), modules);

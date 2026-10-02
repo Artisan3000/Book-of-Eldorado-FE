@@ -1,6 +1,6 @@
 import { PrismaClient, Role, CourseStatus, EnrollmentStatus, LessonProgressStatus } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth";
-import { LEGACY_FOUNDATION_CHAPTER_2_TITLE } from "../src/lib/data/course-visibility";
+import { FOUNDATION_CHAPTER_2_TITLE } from "../src/lib/data/course-visibility";
 import {
   CHAPTER_2_MODULE_SORT_ORDER,
   chapter2Module,
@@ -48,7 +48,7 @@ const seedCourses: SeedCourse[] = [
     title: "Foundation",
     subtitle: "Learn the craft. Build your confidence.",
     description:
-      "Build the client communication, retention, haircut development, product knowledge, and clientele-building foundations that support a sustainable barbering career.",
+      "Build the client communication, retention, haircut development, and product knowledge foundations that support a sustainable barbering career.",
     level: "Foundation",
     priceCents: 74900,
     duration: "8 weeks (self-paced)",
@@ -105,9 +105,7 @@ const seedCourses: SeedCourse[] = [
         ],
       },
       {
-        // Matches production: the Chapter 2 title is unchanged until a final
-        // title is approved and applied with prisma/rename-chapter-2-module.ts.
-        title: LEGACY_FOUNDATION_CHAPTER_2_TITLE,
+        title: FOUNDATION_CHAPTER_2_TITLE,
         description: chapter2Module.description,
         sortOrder: CHAPTER_2_MODULE_SORT_ORDER,
         resourceTitle: chapter2Module.resourceTitle,

@@ -52,13 +52,6 @@ Practice explaining the taper family in plain language.
 
 A client should understand what changes when they ask for a classic taper versus a taper fade versus a skin taper. If you cannot explain the difference clearly, it becomes much easier for the appointment to start with one expectation and end with another.
 
-## Practical assignment
-
-- Complete three supervised taper models.
-- Whenever possible, choose models with different densities, growth patterns, or textures so you are not repeating the same problem three times.
-- Before each service, explain the taper being performed in client-friendly language.
-- Use the Client & Service Tracker and Apprentice Scorecard after each service.
-
 ## Workbook handoff
 
 Use the Lesson 2.3 workbook section to compare the three taper terms, document your guideline and weight-control decisions, note symmetry issues, record the product choice, and capture instructor feedback.

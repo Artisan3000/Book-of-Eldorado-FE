@@ -52,13 +52,6 @@ Put the product in their hand. Show them the amount. Explain where it goes first
 
 If the client leaves knowing only how the haircut looks when you style it, you have left value on the table.
 
-## Practical assignment
-
-- Complete three supervised clipper-and-scissor services.
-- Complete a home-care recommendation card for each client.
-- Produce at least one polished side-part finish.
-- Record the sectioning/connection decision, service time, product choice, and instructor feedback in the workbook.
-
 ## Workbook handoff
 
 Use Lesson 2.5 to plan the shape before each service, record whether the top is connected or intentionally disconnected, document the client’s home routine, and write the exact home-care recommendation you gave them.

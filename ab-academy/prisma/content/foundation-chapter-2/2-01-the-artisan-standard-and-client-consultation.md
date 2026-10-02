@@ -82,17 +82,6 @@ From that list, send 10 invitations and book your first three supervised models.
 
 The goal here is bigger than getting three haircuts on the calendar. You are learning how to create your own repetition instead of waiting for opportunity to come to you.
 
-## Practical assignment
-
-Before moving on to Lesson 2.2:
-
-- Shadow three consultations led by Charlie or another senior barber. Pay attention to what they notice before they ever start cutting.
-- Conduct three supervised consultations yourself. Explain your haircut plan before you begin.
-- Complete three consultation sheets in the Chapter 2 Workbook.
-- Build five core product flash cards.
-- Create your 25-person prospect list.
-- Send 10 professional invitations and confirm three supervised model appointments.
-
 ## Workbook handoff
 
 Use the Lesson 2.1 section of the Chapter 2 Workbook to document what you observed, plan your supervised consultations, build the product flash cards, and track your first outreach and model bookings.

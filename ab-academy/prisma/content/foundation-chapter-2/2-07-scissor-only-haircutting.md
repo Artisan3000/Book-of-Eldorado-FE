@@ -54,12 +54,6 @@ A short scissor cut, a medium layered shape, and a longer cut will not lose thei
 
 Explain when you expect the haircut to stop behaving the way it was designed to behave. That is the maintenance recommendation.
 
-## Practical assignment
-
-- Complete three supervised scissor-only models at different lengths.
-- For each model, record the guide strategy, elevation/overdirection decisions, and maintenance recommendation.
-- Use the Client & Service Tracker and Apprentice Scorecard after each service.
-
 ## Workbook handoff
 
 Use Lesson 2.7 to sketch or describe the intended silhouette before cutting, document the guide and weight decisions, record the final maintenance recommendation, and capture instructor notes after the service.

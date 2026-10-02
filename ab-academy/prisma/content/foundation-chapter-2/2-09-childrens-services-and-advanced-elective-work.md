@@ -54,12 +54,6 @@ Keep it low-pressure. Let the experience do most of the selling.
 
 A simple close is enough: you are glad the child was comfortable, you would be happy to reserve the next haircut, and you also work with adult clients through the Artisan apprenticeship program.
 
-## Practical assignment
-
-- Complete two approved children’s services under designated supervision.
-- Complete one advanced elective model after receiving instructor approval.
-- Document comfort/safety observations, parent communication, product approval, service outcome, and instructor feedback in the workbook.
-
 ## Workbook handoff
 
 Use Lesson 2.9 to reflect on how you adapted the service, record any moments where comfort changed your technical plan, and document the instructor approval for the advanced elective work.

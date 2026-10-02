@@ -54,7 +54,7 @@ export default async function CourseDetailPage({
                   Foundation is organized around the professional habits that
                   support your work beyond the cut. Start with client
                   communication and retention, then move into haircut
-                  development, product knowledge, and clientele building.
+                  development and product knowledge.
                 </p>
                 <p className="text-sm leading-relaxed text-gray-600">
                   Each lesson is designed to be short, practical, and tied to a

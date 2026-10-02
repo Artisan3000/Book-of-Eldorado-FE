@@ -1,10 +1,9 @@
-// Working title from the manuscript. Not approved as the final title.
-export const FOUNDATION_CHAPTER_2_TITLE =
-  "Haircut Development, Product Knowledge & Clientele Building";
+// The approved Chapter 2 title (Oct. 2026). Applied to the database with
+// prisma/rename-chapter-2-module.ts, never by the content import.
+export const FOUNDATION_CHAPTER_2_TITLE = "Haircut Development & Product Knowledge";
 
-// The current production Chapter 2 title. The content import keeps it; it
-// changes only through prisma/rename-chapter-2-module.ts once a final title is
-// approved (add that title here and deploy first).
+// The title production still has until the rename runs there. Remove it from
+// the allow-list once production is renamed.
 export const LEGACY_FOUNDATION_CHAPTER_2_TITLE = "Business & Branding Essentials";
 
 const visibleFoundationModuleTitles = new Set([

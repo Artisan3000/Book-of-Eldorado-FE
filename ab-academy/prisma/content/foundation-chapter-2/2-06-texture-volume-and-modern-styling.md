@@ -56,13 +56,6 @@ Only use client photographs when you have clear permission.
 
 A portfolio is not just proof that you can cut. It teaches future clients what to ask you for.
 
-## Practical assignment
-
-- Complete three supervised texture-focused models.
-- Create three pieces of approved portfolio content from the work.
-- For each service, document what density or bulk you intentionally preserved and what you intentionally removed.
-- Record the styling sequence, products used, service time, and instructor feedback in the workbook.
-
 ## Workbook handoff
 
 Use Lesson 2.6 to plan the texture goal before cutting, record the techniques used and why, document the product sequence, and prepare the three portfolio entries for approval.

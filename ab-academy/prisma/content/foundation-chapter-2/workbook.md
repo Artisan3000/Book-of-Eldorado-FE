@@ -1,6 +1,6 @@
 Artisan Academy — Chapter 2 Workbook
 
-Haircut Development, Product Knowledge & Clientele Building
+Haircut Development & Product Knowledge
 
 This workbook accompanies Chapter 2 of Artisan Academy. Use the website lessons for instruction, then use these pages to plan the work, document supervised services, reflect on feedback, track client-building activity, and prepare for the final capstone.
 

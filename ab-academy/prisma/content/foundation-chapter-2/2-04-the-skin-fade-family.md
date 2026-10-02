@@ -52,13 +52,6 @@ Keep it simple: thank them for letting you work with them, ask how the haircut i
 
 The follow-up is not just customer service. It gives you information about how your work wears after the client leaves your chair.
 
-## Practical assignment
-
-- Complete three supervised skin-fade models.
-- Work toward a 50–60 minute service target without sacrificing the quality checkpoints in this lesson.
-- Send a follow-up to every model within 24 hours.
-- Record service time, fade height, product choice, follow-up status, and instructor feedback in the workbook.
-
 ## Workbook handoff
 
 Use Lesson 2.4 to document the reason for your fade-height choice, where you lost time, which areas required the most correction, the follow-up response, and what you would change on the next service.

@@ -54,12 +54,6 @@ A simple version: your haircut and beard are growing on different schedules. Tod
 
 That is a recommendation. The client still decides.
 
-## Practical assignment
-
-- Complete three supervised beard services.
-- Complete at least one full hair-and-beard combination.
-- For each service, document the desired length, density/patchiness observations, outline decisions, product recommendation, and instructor feedback.
-
 ## Workbook handoff
 
 Use Lesson 2.8 to plan the beard shape before the service, record how it coordinates with the haircut and face, document the product language you used, and capture the instructor’s assessment.

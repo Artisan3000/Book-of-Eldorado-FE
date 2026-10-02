@@ -56,14 +56,6 @@ Do not leave it at “come back whenever.” Give them a useful timeframe and of
 
 This is where the retention habits from Chapter 1 become part of your technical service.
 
-## Practical assignment
-
-- Complete three supervised clipper or buzz-cut models.
-- Take clear before-and-after photographs for each service.
-- Record the service time for each model.
-- Make a rebooking offer to every model before they leave.
-- Use the Client & Service Tracker and Apprentice Scorecard in the Chapter 2 Workbook after each service.
-
 ## Workbook handoff
 
 In the Lesson 2.2 workbook section, record the guard choices, growth-pattern observations, service time, finish decisions, client maintenance recommendation, and instructor feedback for each model.

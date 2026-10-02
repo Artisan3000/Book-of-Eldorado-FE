@@ -25,8 +25,9 @@ import { isVisibleFoundationModuleTitle } from "../src/lib/data/course-visibilit
 // - never changes the module title (see prisma/rename-chapter-2-module.ts);
 // - aborts without changes if any LessonProgress exists on the lessons it would replace;
 // - preserves the module id and sortOrder;
-// - when the lessons already match, updates only the module fields and keeps
-//   lessons and progress untouched;
+// - replaces the obsolete lessons (only when none has progress); once the
+//   approved lessons exist, updates their content in place by id, keeping
+//   numbering and progress;
 // - is a no-op when the database already matches the content files.
 
 type ExistingModule = NonNullable<Awaited<ReturnType<typeof findChapter2Module>>>;
@@ -105,6 +106,22 @@ async function findChapter2Module(client: Prisma.TransactionClient | PrismaClien
   return modules[0];
 }
 
+type ExistingLesson = ExistingModule["lessons"][number];
+
+// The content fields of an approved lesson that differ from the files.
+function getLessonChanges(current: ExistingLesson, lesson: LoadedChapter2Lesson) {
+  const changes: string[] = [];
+
+  if (current.description !== lesson.description) changes.push("description");
+  if (current.duration !== lesson.duration) changes.push(`duration ${current.duration} -> ${lesson.duration}`);
+  if (current.videoUrl !== null) changes.push("videoUrl -> null");
+  if (current.body !== lesson.body) {
+    changes.push(`body ${current.body?.length ?? 0} -> ${lesson.body.length} chars`);
+  }
+
+  return changes;
+}
+
 function lessonsMatch(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
   return (
     existing.lessons.length === lessons.length &&
@@ -114,13 +131,14 @@ function lessonsMatch(existing: ExistingModule, lessons: LoadedChapter2Lesson[])
       return (
         current.sortOrder === lesson.sortOrder &&
         current.title === lesson.title &&
-        current.description === lesson.description &&
-        current.duration === lesson.duration &&
-        current.videoUrl === null &&
-        current.body === lesson.body
+        getLessonChanges(current, lesson).length === 0
       );
     })
   );
+}
+
+function getLessonSet(existing: ExistingModule) {
+  return getExistingChapter2LessonSet(existing.lessons.map((lesson) => lesson.title));
 }
 
 function isUpToDate(existing: ExistingModule, lessons: LoadedChapter2Lesson[]) {
@@ -215,9 +233,10 @@ async function replaceChapter2Lessons(
   );
 }
 
-// When the lessons already match the content files, only the module fields
-// change and the lessons (and any student progress on them) are untouched.
-async function updateChapter2ModuleFields(
+// The approved lessons are already in place: update their content and the
+// module fields by id. Nothing is deleted, so lesson ids, numbering, and any
+// student progress are kept.
+async function updateChapter2InPlace(
   prisma: PrismaClient,
   moduleId: string,
   lessons: LoadedChapter2Lesson[]
@@ -226,16 +245,33 @@ async function updateChapter2ModuleFields(
     async (tx) => {
       const current = await findChapter2Module(tx);
 
-      if (current.id !== moduleId || !lessonsMatch(current, lessons)) {
+      if (current.id !== moduleId || getLessonSet(current) !== "current") {
         throw new Error("Chapter 2 changed during import.");
       }
 
       assertModuleTitleIsVisible(current);
 
-      await tx.module.update({
-        where: { id: moduleId },
-        data: getChapter2ModuleUpdate(current),
-      });
+      for (const [index, lesson] of lessons.entries()) {
+        const existingLesson = current.lessons[index];
+
+        if (getLessonChanges(existingLesson, lesson).length > 0) {
+          await tx.lesson.update({
+            where: { id: existingLesson.id },
+            data: {
+              description: lesson.description,
+              duration: lesson.duration,
+              body: lesson.body,
+              videoUrl: null,
+            },
+          });
+        }
+      }
+
+      const moduleUpdate = getChapter2ModuleUpdate(current);
+
+      if (Object.keys(moduleUpdate).length > 0) {
+        await tx.module.update({ where: { id: moduleId }, data: moduleUpdate });
+      }
     },
     { isolationLevel: "Serializable", timeout: 30_000 }
   );
@@ -262,10 +298,17 @@ function printPlan(
   }
 
   if (!replaceLessons) {
-    const progressRows = existing.lessons.reduce((sum, lesson) => sum + lesson._count.progress, 0);
-    console.log(
-      `\nLessons: all ${existing.lessons.length} already match the content files; unchanged (${progressRows} progress rows kept).`
-    );
+    console.log(`\nUpdate in place (no lessons deleted or created; ids, numbering, and progress kept):`);
+    for (const [index, lesson] of lessons.entries()) {
+      const current = existing.lessons[index];
+      const changes = getLessonChanges(current, lesson);
+
+      console.log(
+        `  2.${lesson.sortOrder} ${current.id} "${lesson.title}": ${
+          changes.length > 0 ? changes.join(", ") : "unchanged"
+        } (progress rows: ${current._count.progress})`
+      );
+    }
     return;
   }
 
@@ -308,7 +351,9 @@ async function main() {
       return;
     }
 
-    const replaceLessons = !lessonsMatch(existing, lessons);
+    // The obsolete lessons are replaced (only while nobody has progress on
+    // them); the approved lessons are updated in place.
+    const replaceLessons = getLessonSet(existing) !== "current";
 
     if (replaceLessons) {
       assertExpectedExistingState(existing);
@@ -326,7 +371,7 @@ async function main() {
     if (replaceLessons) {
       await replaceChapter2Lessons(prisma, existing.id, lessons);
     } else {
-      await updateChapter2ModuleFields(prisma, existing.id, lessons);
+      await updateChapter2InPlace(prisma, existing.id, lessons);
     }
 
     const verified = await findChapter2Module(prisma);
@@ -343,7 +388,7 @@ async function main() {
     console.log(
       replaceLessons
         ? `Import complete: module ${verified.id} now has ${verified.lessons.length} text lessons.`
-        : `Import complete: module ${verified.id} fields updated; lessons unchanged.`
+        : `Import complete: module ${verified.id} and its lessons updated in place.`
     );
   } finally {
     await prisma.$disconnect();
