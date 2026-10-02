@@ -34,6 +34,14 @@ test("every Chapter 2 content file loads with a reading-time duration", () => {
   }
 });
 
+test("Chapter 2 lesson bodies are real manuscript content without a title heading", () => {
+  for (const lesson of loadChapter2Lessons()) {
+    assert.equal(lesson.isPlaceholder, false, lesson.file);
+    assert.doesNotMatch(lesson.body, /^# /m, lesson.file);
+    assert.ok(!lesson.body.includes(lesson.title), lesson.file);
+  }
+});
+
 test("the workbook is a chapter resource, not a Google Docs link", () => {
   assert.ok(chapter2Module.resourceTitle);
   assert.ok(
