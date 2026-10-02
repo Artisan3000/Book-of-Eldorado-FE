@@ -28,8 +28,8 @@ type Chapter2LessonMetadata = {
 
 export const chapter2Module = {
   title: FOUNDATION_CHAPTER_2_TITLE,
-  // Must be set from the approved manuscript before the production import.
-  description: null as string | null,
+  description:
+    "The core of your apprenticeship. Turn consultations into clear haircut plans, build clipper, scissor, texture, and beard work through supervised services, choose and explain products with intention, and start building a returning clientele.",
   resourceTitle: "Chapter 2 Companion Workbook",
   // Stays null until the workbook PDF is served from a logged-in-only Academy
   // route. Never point this at the editable Google Doc.
