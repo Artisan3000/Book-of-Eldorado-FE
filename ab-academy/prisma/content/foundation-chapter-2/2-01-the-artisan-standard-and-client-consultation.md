@@ -1,0 +1,1 @@
+<!-- PLACEHOLDER: Replace this entire file with the approved manuscript for Lesson 2.1 — The Artisan Standard & Client Consultation. The import script refuses to import any lesson body that still contains this marker. -->

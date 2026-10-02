@@ -7,6 +7,10 @@ import {
   LessonProgressStatus,
 } from "@prisma/client";
 import { getVisibleCourseModules } from "@/lib/data/course-visibility";
+import {
+  getLessonContentKind,
+  getSafeResourceHref,
+} from "@/lib/lessons/lesson-content";
 import { prisma } from "@/lib/prisma";
 
 export type StudentEnrollmentSummary = Awaited<
@@ -255,6 +259,8 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
               title: true,
               sortOrder: true,
               description: true,
+              resourceTitle: true,
+              resourceUrl: true,
               lessons: {
                 orderBy: {
                   sortOrder: "asc",
@@ -293,8 +299,14 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     enrollment.course.slug,
     enrollment.course.modules
   );
-  const modules = visibleModules.map((module) => ({
+  const modules = visibleModules.map(({ resourceTitle, resourceUrl, ...module }) => ({
     ...module,
+    resource: resourceTitle
+      ? {
+          title: resourceTitle,
+          href: getSafeResourceHref(resourceUrl),
+        }
+      : null,
     lessons: module.lessons.map((lesson) => ({
       ...lesson,
       progressStatus:
@@ -329,18 +341,11 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     nextLessonHref: nextLesson?.href ?? null,
     modules,
     lessons,
-    resources: [
-      {
-        id: 1,
-        name: `${enrollment.course.title} Handbook (PDF)`,
-        link: `/resources/${enrollment.course.slug}.pdf`,
-      },
-      {
-        id: 2,
-        name: "Style Reference Board",
-        link: `/resources/${enrollment.course.slug}-board.jpg`,
-      },
-    ],
+    resources: modules.flatMap((module) =>
+      module.resource
+        ? [{ id: module.id, moduleTitle: module.title, ...module.resource }]
+        : []
+    ),
   };
 }
 
@@ -355,6 +360,7 @@ export async function getStudentLessonDetail(
       ...lesson,
       moduleTitle: module.title,
       moduleDescription: module.description,
+      moduleResource: module.resource,
     }))
   );
   const lessonIndex = lessons.findIndex((lesson) => lesson.slug === lessonSlug);
@@ -363,7 +369,21 @@ export async function getStudentLessonDetail(
     notFound();
   }
 
-  const lesson = lessons[lessonIndex];
+  const listedLesson = lessons[lessonIndex];
+  // Bodies are loaded for the requested lesson only, never for the whole course.
+  const body = listedLesson.videoUrl
+    ? null
+    : (
+        await prisma.lesson.findUnique({
+          where: { id: listedLesson.id },
+          select: { body: true },
+        })
+      )?.body ?? null;
+  const lesson = {
+    ...listedLesson,
+    body,
+    contentKind: getLessonContentKind({ videoUrl: listedLesson.videoUrl, body }),
+  };
 
   return {
     course: {

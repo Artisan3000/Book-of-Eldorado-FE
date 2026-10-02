@@ -1,0 +1,70 @@
+# Foundation Chapter 2: Text Lessons
+
+Chapter 2, **Haircut Development, Product Knowledge & Clientele Building**, replaces the obsolete **Business & Branding Essentials** module (Foundation module `sortOrder = 20`). It has ten readable lessons and one companion workbook. Chapter 1 continues to use Vimeo lessons unchanged.
+
+## Rendering rule
+
+`getLessonContentKind` (`src/lib/lessons/lesson-content.ts`) decides how a lesson renders:
+
+1. `videoUrl` is set → the existing Vimeo experience, unchanged.
+2. No `videoUrl` and a non-empty `body` → text lesson: server-rendered Markdown (`react-markdown`, raw HTML skipped) plus `TextLessonProgress`.
+3. Neither → the existing "Video coming soon" state.
+
+## Progress
+
+Text lessons use the existing `POST /api/student/courses/[slug]/lessons/[lessonSlug]/progress` route, sending status updates only:
+
+- Opening a `NOT_STARTED` lesson sends `{ "status": "IN_PROGRESS" }` once.
+- **Mark lesson complete** sends `{ "status": "COMPLETED" }`, then refreshes server data so course progress updates.
+- The route never downgrades a completed lesson, and the client ignores late responses that would move status backwards.
+- Text lessons never send `SAVE_POSITION`; `lastPositionSeconds` stays `0`.
+
+## Duration
+
+Text lesson `duration` is computed from the Markdown body at 200 words per minute, rounded up (`getReadingTimeLabel`, e.g. `8 min read`). It is computed at import/seed time, never hand-entered.
+
+## Workbook
+
+The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceUrl`, shown on each Chapter 2 lesson page and in the course Resources tab. It is not a lesson.
+
+`resourceUrl` stays `null` until the workbook PDF is served from a logged-in-only Academy route. While it is null, students see the title with "available to download soon". Never store the editable Google Docs URL. Links are only rendered for in-app paths or `https` URLs (`getSafeResourceHref`).
+
+## Content files
+
+- Metadata (titles, order, optional descriptions, module description, resource): `prisma/foundation-chapter-2.ts`
+- Lesson bodies: `prisma/content/foundation-chapter-2/2-XX-*.md`, one file per lesson
+
+The checked-in files are placeholders containing `<!-- PLACEHOLDER`. To load the approved manuscript:
+
+1. Replace each file's entire contents with that lesson's approved Markdown. Do not repeat the lesson title as a heading, because the page already renders it. Any `#` heading renders as a section heading.
+2. Set `chapter2Module.description` (required) and, optionally, each lesson's `description` in `prisma/foundation-chapter-2.ts`.
+3. Run `npm test` and `npm run build`.
+
+## Import (not yet run against any database)
+
+`prisma/seed.ts` is development-only. It resets seeded credentials and must never run against production.
+
+Production uses `prisma/import-chapter-2-text-lessons.ts`:
+
+```bash
+npx tsx prisma/import-chapter-2-text-lessons.ts          # dry run: reads only
+npx tsx prisma/import-chapter-2-text-lessons.ts --apply  # one Serializable transaction
+```
+
+Before touching the database, the script refuses to run if any lesson body is a placeholder or empty, or if the module description is missing. It then:
+
+- requires exactly one Foundation module at `sortOrder = 20`, titled either the obsolete or the new Chapter 2 title (the obsolete module must contain exactly the seven expected lessons);
+- aborts without changes if any `LessonProgress` exists on the lessons it would replace;
+- deletes and recreates the lessons inside the transaction, keeping the module id and `sortOrder`;
+- is a no-op when the database already matches the content files;
+- re-reads and verifies the result.
+
+## Rollout order
+
+1. Rehearse on a Neon branch created from production: `prisma migrate deploy`, import dry run, `--apply`, then smoke tests.
+2. Production: read-only checks, then `prisma migrate deploy` (migration `20260925120000_add_text_lesson_content`, additive nullable columns). This must happen before the code deploys, because the new code selects the new columns.
+3. Deploy the code. Both Chapter 2 titles are allow-listed in `src/lib/data/course-visibility.ts`.
+4. Run the import dry run, then `--apply`, then verify read-only.
+5. In a follow-up, remove `LEGACY_FOUNDATION_CHAPTER_2_TITLE` from the visibility allow-list.
+
+Each database step requires explicit approval, per [`plans.md`](plans.md#database-safety-and-migration-policy).

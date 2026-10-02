@@ -1,5 +1,10 @@
 import { PrismaClient, Role, CourseStatus, EnrollmentStatus, LessonProgressStatus } from "@prisma/client";
 import { hashPassword } from "../src/lib/auth";
+import {
+  CHAPTER_2_MODULE_SORT_ORDER,
+  chapter2Module,
+  loadChapter2Lessons,
+} from "./foundation-chapter-2";
 
 const prisma = new PrismaClient();
 
@@ -14,16 +19,27 @@ type SeedCourse = {
   sortOrder: number;
   modules: {
     title: string;
-    description?: string;
+    description?: string | null;
     sortOrder?: number;
+    resourceTitle?: string | null;
+    resourceUrl?: string | null;
     lessons: {
       title: string;
-      description?: string;
-      duration: string;
+      description?: string | null;
+      duration: string | null;
       videoUrl?: string;
+      body?: string | null;
     }[];
   }[];
 };
+
+// Development only: this seed resets the seeded admin/student credentials and
+// must never be run against production. Production Chapter 2 content is
+// applied with prisma/import-chapter-2-text-lessons.ts instead.
+const chapter2SeedLessons = loadChapter2Lessons();
+const chapter2PlaceholderCount = chapter2SeedLessons.filter(
+  (lesson) => lesson.isPlaceholder
+).length;
 
 const seedCourses: SeedCourse[] = [
   {
@@ -31,7 +47,7 @@ const seedCourses: SeedCourse[] = [
     title: "Foundation",
     subtitle: "Learn the craft. Build your confidence.",
     description:
-      "Build the client communication, retention, business, and branding foundations that support a sustainable barbering career.",
+      "Build the client communication, retention, haircut development, product knowledge, and clientele-building foundations that support a sustainable barbering career.",
     level: "Foundation",
     priceCents: 74900,
     duration: "8 weeks (self-paced)",
@@ -88,54 +104,19 @@ const seedCourses: SeedCourse[] = [
         ],
       },
       {
-        title: "Business & Branding Essentials",
-        description:
-          "Understand how the shop makes money, how the Artisan brand works day to day, and how to build a professional identity within it.",
-        sortOrder: 20,
-        lessons: [
-          {
-            title: "How a Barbershop Actually Makes Money",
-            description:
-              "Learn the core revenue streams, how each chair affects shop profitability, where retail and add-ons fit, and why your book is a business asset.",
-            duration: "8-10 min",
-          },
-          {
-            title: "The Artisan Brand: What It Means Day-to-Day",
-            description:
-              "Understand what the Artisan brand stands for, what the shop is and is not, and how every barber extends the brand through daily practice.",
-            duration: "7-9 min",
-          },
-          {
-            title: "Building Your Personal Brand Within the Shop",
-            description:
-              "Define your identity as a barber, find your specialty, align with Artisan without losing your voice, and think about your long-term portfolio.",
-            duration: "9-11 min",
-          },
-          {
-            title: "Social Media for Barbers",
-            description:
-              "Practice what to post, how to shoot your work, caption and hashtag strategy, engaging with the Artisan account, and using social presence to support your book.",
-            duration: "10-12 min",
-          },
-          {
-            title: "Pricing, Upselling & Retail",
-            description:
-              "Understand your value, introduce add-ons naturally, recommend products without sounding pushy, and see how retail benefits everyone.",
-            duration: "9-11 min",
-          },
-          {
-            title: "Professionalism & Shop Etiquette",
-            description:
-              "Build standards around punctuality, station care, teamwork, slow days, and professionalism in a shared shop environment.",
-            duration: "7-9 min",
-          },
-          {
-            title: "Chapter Assessment",
-            description:
-              "Complete a brand alignment exercise, one-week content plan, and written scenarios covering business judgment, professionalism, and brand decisions.",
-            duration: "6-8 min",
-          },
-        ],
+        title: chapter2Module.title,
+        description: chapter2Module.description,
+        sortOrder: CHAPTER_2_MODULE_SORT_ORDER,
+        resourceTitle: chapter2Module.resourceTitle,
+        resourceUrl: chapter2Module.resourceUrl,
+        // Placeholder manuscript files seed as empty lessons ("coming soon")
+        // rather than as student-facing text.
+        lessons: chapter2SeedLessons.map((lesson) => ({
+          title: lesson.title,
+          description: lesson.description,
+          duration: lesson.isPlaceholder ? null : lesson.duration,
+          body: lesson.isPlaceholder ? null : lesson.body,
+        })),
       },
     ],
   },
@@ -289,18 +270,23 @@ async function seedCourse(course: SeedCourse) {
       update: {
         title: module.title,
         description: module.description,
+        resourceTitle: module.resourceTitle,
+        resourceUrl: module.resourceUrl,
       },
       create: {
         courseId: savedCourse.id,
         title: module.title,
         description: module.description,
         sortOrder: moduleSortOrder,
+        resourceTitle: module.resourceTitle,
+        resourceUrl: module.resourceUrl,
       },
     });
 
     for (const [lessonIndex, lesson] of module.lessons.entries()) {
       const lessonVideoData =
         lesson.videoUrl === undefined ? {} : { videoUrl: lesson.videoUrl };
+      const lessonBodyData = lesson.body === undefined ? {} : { body: lesson.body };
 
       await prisma.lesson.upsert({
         where: {
@@ -314,6 +300,7 @@ async function seedCourse(course: SeedCourse) {
           description: lesson.description,
           duration: lesson.duration,
           ...lessonVideoData,
+          ...lessonBodyData,
         },
         create: {
           moduleId: savedModule.id,
@@ -321,6 +308,7 @@ async function seedCourse(course: SeedCourse) {
           description: lesson.description,
           duration: lesson.duration,
           ...lessonVideoData,
+          ...lessonBodyData,
           sortOrder: lessonIndex + 1,
         },
       });
@@ -419,6 +407,12 @@ async function seedEnrollments(studentId: string) {
 }
 
 async function main() {
+  if (chapter2PlaceholderCount > 0) {
+    console.warn(
+      `Chapter 2: ${chapter2PlaceholderCount} lesson file(s) are still placeholders and will be seeded without a body.`
+    );
+  }
+
   const { student } = await seedUsers();
 
   for (const course of seedCourses) {

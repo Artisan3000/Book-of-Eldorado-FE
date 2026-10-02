@@ -10,6 +10,9 @@ Source of truth: `Book-of-Eldorado-FE/ab-academy/prisma/schema.prisma`
 - `AuthEvent` — typed auth audit event with hashed identifiers
 - `AuthorizationCode` — user, client, redirect URI, PKCE challenge, expiration, use time
 - `Course` → `Module` → `Lesson`
+  - `Module.resourceTitle` / `Module.resourceUrl` — optional chapter companion resource (e.g. a workbook); the URL is null until it can be served from a logged-in-only Academy route
+  - `Lesson.videoUrl` — Vimeo player URL; when set, the lesson is a video lesson
+  - `Lesson.body` — Markdown for text lessons; used only when `videoUrl` is empty (see [`FOUNDATION_CHAPTER_2_TEXT_LESSONS.md`](FOUNDATION_CHAPTER_2_TEXT_LESSONS.md))
 - `Enrollment` — unique user/course relationship and status
 - `LessonProgress` — unique enrollment/lesson status, timestamps, playback position
 

@@ -1,0 +1,1 @@
+<!-- PLACEHOLDER: Replace this entire file with the approved manuscript for Lesson 2.6 — Texture, Volume & Modern Styling. The import script refuses to import any lesson body that still contains this marker. -->

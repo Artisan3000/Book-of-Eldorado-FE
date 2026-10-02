@@ -52,8 +52,8 @@ export default async function CourseDetailPage({
                 <p className="text-lg leading-relaxed text-gray-800">
                   Foundation is organized around the professional habits that
                   support your work beyond the cut. Start with client
-                  communication and retention, then move into the business and
-                  brand decisions that shape how you show up in the shop.
+                  communication and retention, then move into haircut
+                  development, product knowledge, and clientele building.
                 </p>
                 <p className="text-sm leading-relaxed text-gray-600">
                   Each lesson is designed to be short, practical, and tied to a
@@ -110,8 +110,16 @@ export default async function CourseDetailPage({
                             href={lesson.href}
                             className="flex items-center gap-2 border border-black px-3 py-1 text-sm hover:bg-gray-100 transition"
                           >
-                            <PlayCircle className="w-4 h-4" />
-                            {lesson.completed ? "Rewatch" : "Start Lesson"}
+                            {lesson.videoUrl ? (
+                              <PlayCircle className="w-4 h-4" />
+                            ) : (
+                              <FileText className="w-4 h-4" />
+                            )}
+                            {lesson.completed
+                              ? lesson.videoUrl
+                                ? "Rewatch"
+                                : "Review"
+                              : "Start Lesson"}
                           </Link>
                         </div>
                       ))}
@@ -131,10 +139,35 @@ export default async function CourseDetailPage({
                     Workbook Materials
                   </h3>
                 </div>
-                <p className="text-sm">
-                  Workbook and supporting text resources will be added as the
-                  course materials are finalized.
-                </p>
+                {course.resources.length > 0 ? (
+                  <ul className="mt-4 space-y-3">
+                    {course.resources.map((resource) => (
+                      <li key={resource.id} className="text-sm">
+                        <p className="text-gray-600">{resource.moduleTitle}</p>
+                        {resource.href ? (
+                          <a
+                            href={resource.href}
+                            className="font-medium text-black underline underline-offset-4 hover:text-gray-600"
+                          >
+                            {resource.title}
+                          </a>
+                        ) : (
+                          <p className="font-medium text-black">
+                            {resource.title}{" "}
+                            <span className="font-normal text-gray-600">
+                              (available to download soon)
+                            </span>
+                          </p>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm">
+                    Workbook and supporting text resources will be added as the
+                    course materials are finalized.
+                  </p>
+                )}
               </div>
             ),
           },
