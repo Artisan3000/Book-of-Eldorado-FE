@@ -23,9 +23,12 @@ The approved title is **Haircut Development & Product Knowledge** (`FOUNDATION_C
 Text lessons use the existing `POST /api/student/courses/[slug]/lessons/[lessonSlug]/progress` route, sending status updates only:
 
 - Opening a `NOT_STARTED` lesson sends `{ "status": "IN_PROGRESS" }` once.
-- **Mark lesson complete** sends `{ "status": "COMPLETED" }`, then refreshes server data so course progress updates.
+- Scrolling the end of the lesson body into view sends `{ "status": "COMPLETED" }`, the way a Vimeo lesson completes when playback ends. The measurement lives in `src/lib/lessons/reading-position.ts`. A lesson whose end is already visible when it opens never auto-completes, and completion is sent at most once.
+- **Mark lesson complete** is the fallback and sends the same request.
+- Either way, server data is refreshed so course progress updates.
 - The route never downgrades a completed lesson, and the client ignores late responses that would move status backwards.
 - Text lessons never send `SAVE_POSITION`; `lastPositionSeconds` stays `0`.
+- This is reading completion only. Workbook and practical work are signed off by Charlie or an instructor, tracked manually for now, and lesson completion must never be treated as proof of them.
 
 ## Duration
 
@@ -45,22 +48,22 @@ The workbook is a chapter resource on `Module.resourceTitle` / `Module.resourceU
 Read-only reference pages (not lessons) live at `/student/courses/[slug]/reference/[referenceSlug]`. They are Markdown files in `course-resources/<course>/references/`, registered in `src/lib/course-references.ts` with the chapter's `Module.sortOrder`. Because they are not in the `Lesson` table they never affect lesson numbering, slugs, or progress. They are listed in the course Resources tab and the chapter's lesson sidebars, and use the course page's access rules.
 
 - **Artisan Core Product Guide** (Chapter 2, published): Charlie's guide from the Apprentice Curriculum, with the apprentice's name removed. The workbook's reference section is the printable version.
-- **The Artisan Client-Building Method** (Chapter 1, draft, hidden): placeholder until Charlie's Oct. 1 Basecamp text is supplied.
+- **The Artisan Client-Building Method** (Chapter 1, published): Charlie's Oct. 1 Basecamp method, with only the apprentice's name in the invitation script generalized to "[your name]".
 
-To publish a reference, replace its file's placeholder and set `published: true`.
+To add a reference, register it with `published: false` and placeholder content, then replace the placeholder and set `published: true` once the approved text is in place.
 
 ## Lesson content files
 
 - Metadata (titles, order, optional descriptions, module description, resource): `prisma/foundation-chapter-2.ts`
 - Lesson bodies: `prisma/content/foundation-chapter-2/2-XX-*.md`, one file per lesson
 
-The checked-in files are placeholders containing `<!-- PLACEHOLDER`. To load the approved manuscript:
+The approved manuscript and module description are loaded. To change a lesson:
 
-1. Replace each file's entire contents with that lesson's approved Markdown. Do not repeat the lesson title as a heading, because the page already renders it. Any `#` heading renders as a section heading.
-2. Set `chapter2Module.description` (required; approved Oct. 2026) and, optionally, each lesson's `description` in `prisma/foundation-chapter-2.ts`.
-3. Run `npm test` and `npm run build`.
+1. Edit its Markdown file. Do not repeat the lesson title as a heading, because the page already renders it. Any `#` heading renders as a section heading.
+2. Run `npm test` and `npm run build`.
+3. Re-run the import (dry run, then `--apply`). Lessons are only recreated if no progress exists on them.
 
-## Import (not yet run against any database)
+## Import (applied on rehearsal; production pending)
 
 `prisma/seed.ts` is development-only. It resets seeded credentials and must never run against production.
 
@@ -81,10 +84,15 @@ Before touching the database, the script refuses to run if any lesson body is a 
 - is a no-op when the database already matches the content files;
 - re-reads and verifies the result.
 
+## Current state (Oct. 2, 2026)
+
+- **Rehearsal** (Neon branch from production, `ep-holy-fog`): all five migrations applied, import applied (a re-run is a no-op), title renamed, workbook linked. The smoke test passed: Chapter 1 video, Chapter 2 auto-complete and manual completion, course progress, both references, workbook PDF, signed-out redirects, and mobile width.
+- **Production** (read-only preflight): four migrations applied, `20260925120000_add_text_lesson_content` pending. Chapter 2 is still "Business & Branding Essentials" with the seven obsolete lessons and **no** progress on them, so the import guard will pass. Juan Hernandez's account exists and is active, with role `STUDENT` and an ACTIVE Foundation enrollment.
+
 ## Rollout order
 
-1. Rehearse on a Neon branch created from production: `prisma migrate deploy`, import dry run, `--apply`, then smoke tests.
-2. Production: read-only checks, then `prisma migrate deploy` (migration `20260925120000_add_text_lesson_content`, additive nullable columns). This must happen before the code deploys, because the new code selects the new columns.
+1. Rehearse on a Neon branch created from production: `prisma migrate deploy`, import dry run, `--apply`, then smoke tests. (Done.)
+2. Production: read-only checks, then create a Neon snapshot branch from production as the restore point, then `prisma migrate deploy` (migration `20260925120000_add_text_lesson_content`, additive nullable columns). This must happen before the code deploys, because the new code selects the new columns.
 3. Deploy the code.
 4. Run the import dry run, then `--apply`, then verify read-only.
 5. Once the final title is approved, rename with `prisma/rename-chapter-2-module.ts` (see Chapter title), then remove unused titles from the visibility allow-list.
