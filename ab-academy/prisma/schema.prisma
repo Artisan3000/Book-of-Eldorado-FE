@@ -154,6 +154,9 @@ model Module {
   title       String
   description String?
   sortOrder   Int    @default(0)
+  // Optional companion resource (e.g. a chapter workbook) shown alongside the chapter's lessons.
+  resourceTitle String?
+  resourceUrl   String?
 
   lessons Lesson[]
 
@@ -172,6 +175,8 @@ model Lesson {
   description String?
   duration    String?
   videoUrl    String?
+  // Markdown lesson body for text lessons. A non-null videoUrl always takes precedence.
+  body        String?
   sortOrder   Int    @default(0)
 
   progress LessonProgress[]

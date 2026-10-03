@@ -84,3 +84,82 @@ body {
 .animate-spring-slide {
   animation: spring-slide 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* Long-form text lessons (rendered from Markdown). */
+.lesson-body {
+  max-width: 70ch;
+  color: #1f2937;
+  line-height: 1.75;
+}
+
+.lesson-body > * + * {
+  margin-top: 1.1em;
+}
+
+.lesson-body h2 {
+  margin-top: 2em;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.lesson-body h3 {
+  margin-top: 1.6em;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.lesson-body h4 {
+  margin-top: 1.4em;
+  font-weight: 600;
+}
+
+.lesson-body > :first-child {
+  margin-top: 0;
+}
+
+.lesson-body ul,
+.lesson-body ol {
+  padding-left: 1.5em;
+}
+
+.lesson-body ul {
+  list-style: disc;
+}
+
+.lesson-body ol {
+  list-style: decimal;
+}
+
+.lesson-body li + li {
+  margin-top: 0.4em;
+}
+
+.lesson-body a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.lesson-body blockquote {
+  border-left: 2px solid #000;
+  padding-left: 1em;
+  font-style: italic;
+}
+
+.lesson-body hr {
+  border-color: #d1d5db;
+  margin: 2em 0;
+}
+
+/* Horizontal page gutter shared by the site header and account pages:
+   20px on phones, 32px from sm up. Pages that widen it on desktop add md:px-16. */
+@layer components {
+  .page-gutter {
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 40rem) {
+    .page-gutter {
+      padding-inline: 2rem;
+    }
+  }
+}

@@ -6,7 +6,17 @@ import {
   EnrollmentStatus,
   LessonProgressStatus,
 } from "@prisma/client";
+import {
+  findPublishedCourseReference,
+  getModuleReferences,
+  loadCourseReferenceBody,
+} from "@/lib/course-references";
 import { getVisibleCourseModules } from "@/lib/data/course-visibility";
+import {
+  getLessonContentKind,
+  getSafeResourceHref,
+  isPlaceholderLessonBody,
+} from "@/lib/lessons/lesson-content";
 import { prisma } from "@/lib/prisma";
 
 export type StudentEnrollmentSummary = Awaited<
@@ -255,6 +265,8 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
               title: true,
               sortOrder: true,
               description: true,
+              resourceTitle: true,
+              resourceUrl: true,
               lessons: {
                 orderBy: {
                   sortOrder: "asc",
@@ -293,8 +305,17 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     enrollment.course.slug,
     enrollment.course.modules
   );
-  const modules = visibleModules.map((module) => ({
+  const modules = visibleModules.map(({ resourceTitle, resourceUrl, ...module }) => ({
     ...module,
+    resource: resourceTitle
+      ? {
+          title: resourceTitle,
+          href: getSafeResourceHref(resourceUrl),
+        }
+      : null,
+    // Read-only reference pages: not lessons, so they never count toward
+    // progress or change lesson numbering.
+    references: getModuleReferences(enrollment.course.slug, module.sortOrder),
     lessons: module.lessons.map((lesson) => ({
       ...lesson,
       progressStatus:
@@ -329,18 +350,14 @@ export async function getStudentCourseDetail(userId: string, slug: string) {
     nextLessonHref: nextLesson?.href ?? null,
     modules,
     lessons,
-    resources: [
-      {
-        id: 1,
-        name: `${enrollment.course.title} Handbook (PDF)`,
-        link: `/resources/${enrollment.course.slug}.pdf`,
-      },
-      {
-        id: 2,
-        name: "Style Reference Board",
-        link: `/resources/${enrollment.course.slug}-board.jpg`,
-      },
-    ],
+    resources: modules
+      .filter((module) => module.resource || module.references.length > 0)
+      .map((module) => ({
+        id: module.id,
+        moduleTitle: module.title,
+        download: module.resource,
+        references: module.references,
+      })),
   };
 }
 
@@ -355,6 +372,8 @@ export async function getStudentLessonDetail(
       ...lesson,
       moduleTitle: module.title,
       moduleDescription: module.description,
+      moduleResource: module.resource,
+      moduleReferences: module.references,
     }))
   );
   const lessonIndex = lessons.findIndex((lesson) => lesson.slug === lessonSlug);
@@ -363,7 +382,21 @@ export async function getStudentLessonDetail(
     notFound();
   }
 
-  const lesson = lessons[lessonIndex];
+  const listedLesson = lessons[lessonIndex];
+  // Bodies are loaded for the requested lesson only, never for the whole course.
+  const body = listedLesson.videoUrl
+    ? null
+    : (
+        await prisma.lesson.findUnique({
+          where: { id: listedLesson.id },
+          select: { body: true },
+        })
+      )?.body ?? null;
+  const lesson = {
+    ...listedLesson,
+    body,
+    contentKind: getLessonContentKind({ videoUrl: listedLesson.videoUrl, body }),
+  };
 
   return {
     course: {
@@ -375,5 +408,40 @@ export async function getStudentLessonDetail(
     lesson,
     previousLesson: lessons[lessonIndex - 1] ?? null,
     nextLesson: lessons[lessonIndex + 1] ?? null,
+  };
+}
+
+export async function getStudentCourseReference(
+  userId: string,
+  courseSlug: string,
+  referenceSlug: string
+) {
+  const reference = findPublishedCourseReference(courseSlug, referenceSlug);
+
+  if (!reference) {
+    notFound();
+  }
+
+  // Same enrollment and chapter-visibility checks as the course page.
+  const course = await getStudentCourseDetail(userId, courseSlug);
+  const courseModule = course.modules.find(
+    (candidate) => candidate.sortOrder === reference.moduleSortOrder
+  );
+
+  if (!courseModule) {
+    notFound();
+  }
+
+  const body = await loadCourseReferenceBody(reference);
+
+  if (isPlaceholderLessonBody(body)) {
+    notFound();
+  }
+
+  return {
+    course: { title: course.title },
+    module: { title: courseModule.title, resource: courseModule.resource },
+    reference: { title: reference.title, summary: reference.summary },
+    body,
   };
 }

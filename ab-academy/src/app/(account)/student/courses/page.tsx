@@ -9,7 +9,7 @@ export default async function StudentCourses() {
   const { courses } = await getStudentDashboardData(user.id);
 
   return (
-    <section className="px-8 py-8 animate-fadeIn md:px-16">
+    <section className="page-gutter py-8 animate-fadeIn md:px-16">
       <h2 className="text-2xl mb-6">My Courses</h2>
 
       {courses.length > 0 ? (

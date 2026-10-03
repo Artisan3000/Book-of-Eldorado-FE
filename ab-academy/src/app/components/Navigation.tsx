@@ -5,7 +5,7 @@ import LogoutButton from "./LogoutButton";
 
 export default function Navigation({ user }: { user: AppUser | null }) {
   return (
-    <nav className="flex items-center justify-between border-b border-black px-8 py-4">
+    <nav className="flex items-center justify-between border-b border-black page-gutter py-4">
       {/* Logo / Title */}
       <div>
         <Link href="/">

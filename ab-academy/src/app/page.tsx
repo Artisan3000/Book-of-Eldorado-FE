@@ -135,7 +135,7 @@ export default function Home() {
             {
               title: "Foundation",
               subtitle: "Learn the craft. Build your confidence.",
-              desc: "Build the client communication, retention, business, and branding foundations that support a sustainable barbering career.",
+              desc: "Build the client communication, retention, haircut development, and product knowledge foundations that support a sustainable barbering career.",
               link: "/courses/foundation",
               highlight: false,
             },

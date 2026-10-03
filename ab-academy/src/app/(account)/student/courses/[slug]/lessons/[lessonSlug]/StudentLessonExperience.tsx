@@ -1,9 +1,23 @@
 "use client";
 
-import { ArrowLeft, CheckCircle2, Clock, PlayCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  FileText,
+  PlayCircle,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
+import { isPdfHref, type LessonContentKind } from "@/lib/lessons/lesson-content";
+import {
+  getRemainingReadingMinutes,
+  parseReadingMinutes,
+  type ReadingPosition,
+} from "@/lib/lessons/reading-position";
+import ReadingPositionIndicator from "./ReadingPositionIndicator";
+import TextLessonProgress from "./TextLessonProgress";
 
 type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
 
@@ -22,11 +36,19 @@ type StudentLessonExperienceProps = {
     id: string;
     title: string;
     description: string | null;
+    duration: string | null;
     videoUrl: string | null;
+    contentKind: LessonContentKind;
     moduleTitle: string;
+    moduleResource: {
+      title: string;
+      href: string | null;
+    } | null;
+    moduleReferences: { slug: string; title: string; href: string }[];
     progressStatus: LessonProgressStatus;
     lastPositionSeconds: number;
   };
+  textContent: ReactNode;
   slug: string;
   lessonSlug: string;
   previousLesson: LessonLink;
@@ -48,6 +70,7 @@ function getLessonStatusLabel(status: LessonProgressStatus) {
 export default function StudentLessonExperience({
   course,
   lesson,
+  textContent,
   slug,
   lessonSlug,
   previousLesson,
@@ -55,10 +78,36 @@ export default function StudentLessonExperience({
 }: StudentLessonExperienceProps) {
   const [progressStatus, setProgressStatus] =
     useState<LessonProgressStatus>(lesson.progressStatus);
-  const [durationLabel, setDurationLabel] = useState("—");
+  // Video lessons report their duration from Vimeo; text lessons use the
+  // stored reading time.
+  const [durationLabel, setDurationLabel] = useState(
+    lesson.contentKind === "text" ? lesson.duration || "—" : "—"
+  );
   const handleDurationChange = useCallback((nextDurationLabel: string) => {
     setDurationLabel(nextDurationLabel);
   }, []);
+  const textBodyRef = useRef<HTMLElement>(null);
+  const [readingPosition, setReadingPosition] = useState<ReadingPosition>({
+    progress: 0,
+    reachedEnd: false,
+    startedBody: false,
+  });
+  // Rounded so scrolling re-renders only when the indicator would visibly move.
+  const handleReadingPositionChange = useCallback((next: ReadingPosition) => {
+    const progress = Math.round(next.progress * 500) / 500;
+
+    setReadingPosition((current) =>
+      current.progress === progress &&
+      current.reachedEnd === next.reachedEnd &&
+      current.startedBody === next.startedBody
+        ? current
+        : { ...next, progress }
+    );
+  }, []);
+  const remainingMinutes =
+    lesson.contentKind === "text"
+      ? getRemainingReadingMinutes(parseReadingMinutes(lesson.duration), readingPosition)
+      : null;
   const handleProgressStatusChange = useCallback(
     (nextProgressStatus: LessonProgressStatus) => {
       setProgressStatus(nextProgressStatus);
@@ -100,7 +149,7 @@ export default function StudentLessonExperience({
 
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <main className="space-y-6">
-          {lesson.videoUrl ? (
+          {lesson.contentKind === "video" && lesson.videoUrl ? (
             <VimeoPlayer
               playerUrl={lesson.videoUrl}
               title={lesson.title}
@@ -111,6 +160,24 @@ export default function StudentLessonExperience({
               onDurationChange={handleDurationChange}
               onProgressStatusChange={handleProgressStatusChange}
             />
+          ) : lesson.contentKind === "text" ? (
+            <>
+              <article ref={textBodyRef} className="border border-gray-300 p-6 md:p-10">
+                {textContent}
+              </article>
+              <ReadingPositionIndicator
+                progress={readingPosition.progress}
+                remainingMinutes={remainingMinutes}
+              />
+              <TextLessonProgress
+                courseSlug={slug}
+                lessonSlug={lessonSlug}
+                progressStatus={progressStatus}
+                bodyRef={textBodyRef}
+                onReadingPositionChange={handleReadingPositionChange}
+                onProgressStatusChange={handleProgressStatusChange}
+              />
+            </>
           ) : (
             <div className="flex aspect-video items-center justify-center border border-black bg-gray-50">
               <div className="px-6 text-center">
@@ -123,14 +190,16 @@ export default function StudentLessonExperience({
             </div>
           )}
 
-          <section className="border border-gray-300 p-6">
-            <h2 className="mb-3 text-xl font-semibold">Lesson Notes</h2>
-            <p className="text-sm leading-relaxed text-gray-700">
-              Use this page as the lesson home for {lesson.title}. The current
-              course data includes the lesson summary; full lesson materials can
-              be attached here once the media and workbook model is ready.
-            </p>
-          </section>
+          {lesson.contentKind !== "text" && (
+            <section className="border border-gray-300 p-6">
+              <h2 className="mb-3 text-xl font-semibold">Lesson Notes</h2>
+              <p className="text-sm leading-relaxed text-gray-700">
+                Use this page as the lesson home for {lesson.title}. The current
+                course data includes the lesson summary; full lesson materials can
+                be attached here once the media and workbook model is ready.
+              </p>
+            </section>
+          )}
         </main>
 
         <aside className="space-y-4">
@@ -146,6 +215,46 @@ export default function StudentLessonExperience({
               {Math.round(course.progress * 100)}% complete
             </p>
           </div>
+
+          {(lesson.moduleResource || lesson.moduleReferences.length > 0) && (
+            <div className="space-y-2 border border-gray-300 p-5">
+              <h2 className="inline-flex items-center gap-2 font-semibold">
+                <FileText className="h-4 w-4" />
+                {lesson.moduleResource && lesson.moduleReferences.length === 0
+                  ? "Chapter Resource"
+                  : "Chapter Resources"}
+              </h2>
+              {lesson.moduleResource && (lesson.moduleResource.href ? (
+                <a
+                  href={lesson.moduleResource.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm underline underline-offset-4 hover:text-gray-600"
+                >
+                  {lesson.moduleResource.title}
+                  {isPdfHref(lesson.moduleResource.href) && " (PDF)"}
+                </a>
+              ) : (
+                <>
+                  <p className="text-sm font-medium">
+                    {lesson.moduleResource.title}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-600">
+                    Available to download soon.
+                  </p>
+                </>
+              ))}
+              {lesson.moduleReferences.map((reference) => (
+                <Link
+                  key={reference.slug}
+                  href={reference.href}
+                  className="block text-sm underline underline-offset-4 hover:text-gray-600"
+                >
+                  {reference.title}
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="space-y-3">
             {previousLesson && (

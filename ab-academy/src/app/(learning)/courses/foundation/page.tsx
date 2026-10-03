@@ -55,10 +55,11 @@ export default async function FoundationCoursePage() {
             <>
               <h2 className="text-2xl font-bold mb-4">About This Course</h2>
               <p className="text-lg leading-relaxed">
-                Foundation introduces the client, communication, and business
-                practices that support a sustainable barbering career. These
-                modules are scaffolded for short video lessons, workbook
-                exercises, and practical reflection prompts.
+                Foundation introduces the client communication, haircut
+                development, and product knowledge practices that support a
+                sustainable barbering career. These modules combine short video
+                lessons, readable lessons, workbook exercises, and practical
+                reflection prompts.
               </p>
             </>
             ),
@@ -71,8 +72,8 @@ export default async function FoundationCoursePage() {
               <ul className="list-disc list-inside space-y-2 leading-relaxed">
                 <li>Practice clear client consultation habits</li>
                 <li>Understand follow-up and retention foundations</li>
-                <li>Begin shaping a simple barber brand position</li>
-                <li>Outline service menu and client experience basics</li>
+                <li>Develop core haircut families from consultation to finish</li>
+                <li>Build product knowledge and a lasting client book</li>
                 <li>Use workbook prompts to prepare for deeper coursework</li>
               </ul>
             </>

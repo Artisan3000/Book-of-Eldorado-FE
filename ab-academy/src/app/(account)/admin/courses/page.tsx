@@ -1,5 +1,12 @@
 import { CourseStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { getLessonContentKind } from "@/lib/lessons/lesson-content";
+
+const contentKindLabels = {
+  video: "Video attached",
+  text: "Text lesson",
+  missing: "Missing content",
+} as const;
 
 function getChapterNumber(sortOrder: number) {
   if (sortOrder >= 10) {
@@ -28,6 +35,8 @@ export default async function AdminCoursesPage() {
           title: true,
           description: true,
           sortOrder: true,
+          resourceTitle: true,
+          resourceUrl: true,
           lessons: {
             orderBy: { sortOrder: "asc" },
             select: {
@@ -36,6 +45,7 @@ export default async function AdminCoursesPage() {
               duration: true,
               sortOrder: true,
               videoUrl: true,
+              body: true,
             },
           },
         },
@@ -96,6 +106,12 @@ export default async function AdminCoursesPage() {
                           {module.description}
                         </p>
                       )}
+                      {module.resourceTitle && (
+                        <p className="mt-1 text-sm text-gray-600">
+                          Resource: {module.resourceTitle} (
+                          {module.resourceUrl || "URL not set"})
+                        </p>
+                      )}
                     </div>
 
                     {module.lessons.length > 0 ? (
@@ -108,40 +124,42 @@ export default async function AdminCoursesPage() {
                               <th className="py-2 pr-4 font-medium">
                                 Duration
                               </th>
-                              <th className="py-2 pr-4 font-medium">Video</th>
+                              <th className="py-2 pr-4 font-medium">Content</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {module.lessons.map((lesson) => (
-                              <tr
-                                key={lesson.id}
-                                className="border-b border-gray-200 last:border-b-0"
-                              >
-                                <td className="py-3 pr-4">
-                                  {getChapterNumber(module.sortOrder)}.
-                                  {lesson.sortOrder}
-                                </td>
-                                <td className="py-3 pr-4 font-medium">
-                                  {lesson.title}
-                                </td>
-                                <td className="py-3 pr-4 text-gray-600">
-                                  {lesson.duration || "Not set"}
-                                </td>
-                                <td className="py-3 pr-4">
-                                  <span
-                                    className={`inline-block border px-2 py-1 text-xs ${
-                                      lesson.videoUrl
-                                        ? "border-black text-black"
-                                        : "border-gray-300 text-gray-500"
-                                    }`}
-                                  >
-                                    {lesson.videoUrl
-                                      ? "Video attached"
-                                      : "Missing video"}
-                                  </span>
-                                </td>
-                              </tr>
-                            ))}
+                            {module.lessons.map((lesson) => {
+                              const contentKind = getLessonContentKind(lesson);
+
+                              return (
+                                <tr
+                                  key={lesson.id}
+                                  className="border-b border-gray-200 last:border-b-0"
+                                >
+                                  <td className="py-3 pr-4">
+                                    {getChapterNumber(module.sortOrder)}.
+                                    {lesson.sortOrder}
+                                  </td>
+                                  <td className="py-3 pr-4 font-medium">
+                                    {lesson.title}
+                                  </td>
+                                  <td className="py-3 pr-4 text-gray-600">
+                                    {lesson.duration || "Not set"}
+                                  </td>
+                                  <td className="py-3 pr-4">
+                                    <span
+                                      className={`inline-block border px-2 py-1 text-xs ${
+                                        contentKind === "missing"
+                                          ? "border-gray-300 text-gray-500"
+                                          : "border-black text-black"
+                                      }`}
+                                    >
+                                      {contentKindLabels[contentKind]}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>

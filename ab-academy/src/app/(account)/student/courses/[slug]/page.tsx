@@ -4,6 +4,7 @@ import Tabs from "@/app/components/Tabs";
 import { requireRole } from "@/lib/current-user";
 import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentCourseDetail } from "@/lib/data/student";
+import { isPdfHref } from "@/lib/lessons/lesson-content";
 
 export default async function CourseDetailPage({
   params,
@@ -15,7 +16,7 @@ export default async function CourseDetailPage({
   const course = await getStudentCourseDetail(user.id, slug);
 
   return (
-    <section className="px-16 py-8 animate-fadeIn">
+    <section className="page-gutter py-8 animate-fadeIn md:px-16">
       {/* --- Header --- */}
       <div className="mb-8 border-b border-gray-300 pb-4">
         <h1 className="text-3xl font-bold mb-2">{course.title}</h1>
@@ -38,8 +39,8 @@ export default async function CourseDetailPage({
       </div>
 
       <Tabs
-        navClassName="flex gap-6 mb-8 border-b border-gray-300"
-        buttonClassName="pb-2 text-sm font-medium"
+        navClassName="flex gap-6 mb-8 overflow-x-auto border-b border-gray-300"
+        buttonClassName="shrink-0 whitespace-nowrap pb-2 text-sm font-medium"
         activeButtonClassName="border-b-2 border-black text-black"
         inactiveButtonClassName="text-gray-500 hover:text-black"
         activeIndicatorClassName="hidden"
@@ -52,8 +53,8 @@ export default async function CourseDetailPage({
                 <p className="text-lg leading-relaxed text-gray-800">
                   Foundation is organized around the professional habits that
                   support your work beyond the cut. Start with client
-                  communication and retention, then move into the business and
-                  brand decisions that shape how you show up in the shop.
+                  communication and retention, then move into haircut
+                  development and product knowledge.
                 </p>
                 <p className="text-sm leading-relaxed text-gray-600">
                   Each lesson is designed to be short, practical, and tied to a
@@ -110,8 +111,16 @@ export default async function CourseDetailPage({
                             href={lesson.href}
                             className="flex items-center gap-2 border border-black px-3 py-1 text-sm hover:bg-gray-100 transition"
                           >
-                            <PlayCircle className="w-4 h-4" />
-                            {lesson.completed ? "Rewatch" : "Start Lesson"}
+                            {lesson.videoUrl ? (
+                              <PlayCircle className="w-4 h-4" />
+                            ) : (
+                              <FileText className="w-4 h-4" />
+                            )}
+                            {lesson.completed
+                              ? lesson.videoUrl
+                                ? "Rewatch"
+                                : "Review"
+                              : "Start Lesson"}
                           </Link>
                         </div>
                       ))}
@@ -131,10 +140,51 @@ export default async function CourseDetailPage({
                     Workbook Materials
                   </h3>
                 </div>
-                <p className="text-sm">
-                  Workbook and supporting text resources will be added as the
-                  course materials are finalized.
-                </p>
+                {course.resources.length > 0 ? (
+                  <ul className="mt-4 space-y-5">
+                    {course.resources.map((resource) => (
+                      <li key={resource.id} className="space-y-2 text-sm">
+                        <p className="text-gray-600">{resource.moduleTitle}</p>
+                        {resource.download &&
+                          (resource.download.href ? (
+                            <a
+                              href={resource.download.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block font-medium text-black underline underline-offset-4 hover:text-gray-600"
+                            >
+                              {resource.download.title}
+                              {isPdfHref(resource.download.href) && " (PDF)"}
+                            </a>
+                          ) : (
+                            <p className="font-medium text-black">
+                              {resource.download.title}{" "}
+                              <span className="font-normal text-gray-600">
+                                (available to download soon)
+                              </span>
+                            </p>
+                          ))}
+                        {resource.references.map((reference) => (
+                          <div key={reference.slug}>
+                            <Link
+                              href={reference.href}
+                              className="font-medium text-black underline underline-offset-4 hover:text-gray-600"
+                            >
+                              {reference.title}
+                            </Link>
+                            <span className="text-gray-600"> · Reference</span>
+                            <p className="text-gray-600">{reference.summary}</p>
+                          </div>
+                        ))}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm">
+                    Workbook and supporting text resources will be added as the
+                    course materials are finalized.
+                  </p>
+                )}
               </div>
             ),
           },
