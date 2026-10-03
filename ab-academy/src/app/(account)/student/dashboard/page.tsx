@@ -39,7 +39,7 @@ export default async function StudentDashboardPage() {
   ];
 
   return (
-    <section className="px-8 md:px-16 py-12 animate-fadeIn">
+    <section className="page-gutter md:px-16 py-12 animate-fadeIn">
       {/* --- Personalized Greeting --- */}
       <div className="mb-10">
         <h1 className="text-3xl md:text-4xl font-semibold mb-2">

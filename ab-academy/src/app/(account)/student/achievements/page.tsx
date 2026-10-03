@@ -52,7 +52,7 @@ export default function StudentAchievements() {
   ];
 
   return (
-    <section className="px-8 md:px-16 py-12 animate-fadeIn">
+    <section className="page-gutter md:px-16 py-12 animate-fadeIn">
       {/* --- Header --- */}
       <div className="mb-10 flex flex-col md:flex-row md:items-center md:justify-between">
         <h2 className="text-3xl font-semibold flex items-center gap-2 mb-2 md:mb-0">

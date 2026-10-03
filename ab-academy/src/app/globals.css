@@ -149,3 +149,17 @@ body {
   border-color: #d1d5db;
   margin: 2em 0;
 }
+
+/* Horizontal page gutter shared by the site header and account pages:
+   20px on phones, 32px from sm up. Pages that widen it on desktop add md:px-16. */
+@layer components {
+  .page-gutter {
+    padding-inline: 1.25rem;
+  }
+
+  @media (min-width: 40rem) {
+    .page-gutter {
+      padding-inline: 2rem;
+    }
+  }
+}

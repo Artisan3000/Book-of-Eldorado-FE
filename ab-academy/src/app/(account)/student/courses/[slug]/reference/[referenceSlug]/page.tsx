@@ -23,7 +23,7 @@ export default async function CourseReferencePage({
   const printable = module.resource?.href ? module.resource : null;
 
   return (
-    <section className="px-8 py-8 animate-fadeIn md:px-16">
+    <section className="page-gutter py-8 animate-fadeIn md:px-16">
       <Link
         href={`/student/courses/${slug}`}
         className="mb-8 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-black"

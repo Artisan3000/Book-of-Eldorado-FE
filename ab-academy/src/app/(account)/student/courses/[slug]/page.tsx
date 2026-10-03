@@ -16,7 +16,7 @@ export default async function CourseDetailPage({
   const course = await getStudentCourseDetail(user.id, slug);
 
   return (
-    <section className="px-16 py-8 animate-fadeIn">
+    <section className="page-gutter py-8 animate-fadeIn md:px-16">
       {/* --- Header --- */}
       <div className="mb-8 border-b border-gray-300 pb-4">
         <h1 className="text-3xl font-bold mb-2">{course.title}</h1>

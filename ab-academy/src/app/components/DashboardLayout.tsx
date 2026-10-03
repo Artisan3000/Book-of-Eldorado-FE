@@ -31,7 +31,7 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="border-b border-black px-8 py-6 flex items-center justify-between">
+      <header className="border-b border-black page-gutter py-6 flex items-center justify-between">
         <div>
           <h1 className="text-3xl">{title}</h1>
           {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
@@ -90,7 +90,7 @@ export default function DashboardLayout({
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-black px-8 py-4 text-center text-xs text-gray-600">
+      <footer className="border-t border-black page-gutter py-4 text-center text-xs text-gray-600">
         © {new Date().getFullYear()} Artisan Barber Foundation. All rights reserved.
       </footer>
     </div>
