@@ -55,15 +55,32 @@ test("the Core Product Guide belongs to Chapter 2 and covers the ten core produc
   assert.equal((body.match(/^\*\*Client-friendly explanation:\*\* /gm) ?? []).length, 10);
 });
 
-test("the Client-Building Method belongs to Chapter 1", () => {
-  const method = courseReferences.find((reference) => reference.slug === "client-building-method");
+test("the Client-Building Method belongs to Chapter 1 and keeps Charlie's four stages", () => {
+  const method = findPublishedCourseReference("foundation", "client-building-method");
 
-  assert.equal(method?.moduleSortOrder, 10);
+  assert.ok(method);
+  assert.equal(method.moduleSortOrder, 10);
+
+  const body = readFileSync(method.file, "utf8");
+  const stages = [...body.matchAll(/^## (\d\. .+)$/gm)].map((match) => match[1]);
+
+  assert.deepEqual(stages, ["1. Attract", "2. Convert", "3. Retain", "4. Referrals"]);
+  assert.match(body, /Hi, this is \[your name\] from Artisan Barber\./);
+
+  const scorecard = body.split("## Weekly Apprentice Scorecard")[1].split("**Total:**")[0];
+  const points = [...scorecard.matchAll(/^- .+: (\d+)$/gm)].map((match) => Number(match[1]));
+
+  assert.equal(points.length, 7);
+  assert.equal(points.reduce((sum, value) => sum + value, 0), 100);
 });
 
 test("references live under /reference, apart from lesson URLs", () => {
   assert.deepEqual(
     getModuleReferences("foundation", 20).map((reference) => reference.href),
     ["/student/courses/foundation/reference/core-product-guide"]
+  );
+  assert.deepEqual(
+    getModuleReferences("foundation", 10).map((reference) => reference.href),
+    ["/student/courses/foundation/reference/client-building-method"]
   );
 });

@@ -28,7 +28,7 @@ export const courseReferences: readonly CourseReference[] = [
     title: "The Artisan Client-Building Method",
     summary: "Attract, convert, retain, and generate referrals while you work under supervision.",
     file: join(REFERENCES_DIRECTORY, "foundation", "references", "client-building-method.md"),
-    published: false,
+    published: true,
   },
   {
     courseSlug: "foundation",
