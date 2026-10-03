@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   FOUNDATION_CHAPTER_2_TITLE,
-  LEGACY_FOUNDATION_CHAPTER_2_TITLE,
   getVisibleCourseModules,
 } from "./course-visibility";
 
@@ -14,10 +13,11 @@ test("Foundation shows Chapter 1 and the new Chapter 2", () => {
   assert.deepEqual(getVisibleCourseModules("foundation", modules), modules);
 });
 
-test("the legacy Chapter 2 title stays visible until production is renamed", () => {
-  const modules = [chapter1, { title: LEGACY_FOUNDATION_CHAPTER_2_TITLE }];
-
-  assert.deepEqual(getVisibleCourseModules("foundation", modules), modules);
+test("the retired Business & Branding Chapter 2 title is no longer shown", () => {
+  assert.deepEqual(
+    getVisibleCourseModules("foundation", [chapter1, { title: "Business & Branding Essentials" }]),
+    [chapter1]
+  );
 });
 
 test("Foundation hides modules that are not allow-listed", () => {
