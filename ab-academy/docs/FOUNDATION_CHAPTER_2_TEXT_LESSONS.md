@@ -4,11 +4,11 @@ Chapter 2 (Foundation module `sortOrder = 20`) replaces the obsolete Business & 
 
 ## Chapter title
 
-The approved title is **Haircut Development & Product Knowledge** (`FOUNDATION_CHAPTER_2_TITLE`). Production still has **Business & Branding Essentials** until it is renamed; both are allow-listed. The content import never changes the title. To rename (rehearsal done; production pending):
+The title is **Haircut Development & Product Knowledge** (`FOUNDATION_CHAPTER_2_TITLE`), applied on rehearsal and production. It is the only Chapter 2 title in the Foundation visibility allow-list (`src/lib/data/course-visibility.ts`); the old "Business & Branding Essentials" title was removed after the production rename. The content import never changes the title. To rename again:
 
-1. Deploy the code first (a title missing from the allow-list in `src/lib/data/course-visibility.ts` hides the chapter from students).
-2. `npx tsx prisma/rename-chapter-2-module.ts --title "Haircut Development & Product Knowledge"` (dry run), then add `--apply`.
-3. Afterwards, remove `LEGACY_FOUNDATION_CHAPTER_2_TITLE` from the allow-list.
+1. Add the new title to the allow-list and deploy first (a title missing from the allow-list hides the chapter from students).
+2. `npx tsx prisma/rename-chapter-2-module.ts --title "New Title"` (dry run), then add `--apply`.
+3. Afterwards, remove the old title from the allow-list.
 
 ## Rendering rule
 
@@ -64,7 +64,7 @@ The approved manuscript and module description are loaded. To change a lesson:
 2. Run `npm test` and `npm run build`.
 3. Re-run the import (dry run, then `--apply`). Lessons are only recreated if no progress exists on them.
 
-## Import (applied on rehearsal; production pending)
+## Import (applied on rehearsal and production)
 
 `prisma/seed.ts` is development-only. It resets seeded credentials and must never run against production.
 
@@ -85,10 +85,18 @@ Before touching the database, the script refuses to run if any lesson body is a 
 - is a no-op when the database already matches the content files;
 - re-reads and verifies the result.
 
-## Current state (Oct. 2, 2026)
+## Current state (Oct. 3, 2026)
 
-- **Rehearsal** (Neon branch from production, `ep-holy-fog`): all five migrations applied, import applied (a re-run is a no-op), title renamed, workbook linked. The smoke test passed: Chapter 1 video, Chapter 2 auto-complete and manual completion, course progress, both references, workbook PDF, signed-out redirects, and mobile width.
-- **Production** (read-only preflight): four migrations applied, `20260925120000_add_text_lesson_content` pending. Chapter 2 is still "Business & Branding Essentials" with the seven obsolete lessons and **no** progress on them, so the import guard will pass. Juan Hernandez's account exists and is active, with role `STUDENT` and an ACTIVE Foundation enrollment.
+Rolled out to production on Oct. 2–3, 2026 (UTC times):
+
+- Restore point: Neon branch `pre-ch2-rollout-2026-10-02` (`br-empty-bonus-apslo75q`), taken from production at LSN `0/583D218` before any write.
+- 01:34: `prisma migrate deploy` applied `20260925120000_add_text_lesson_content`.
+- 01:37: PR #3 merged; Vercel deployed `aeb6fcc` to production.
+- 01:40: the import replaced the seven obsolete lessons (no progress on them) with the ten text lessons and set the description and workbook fields.
+- 01:45: the module was renamed to Haircut Development & Product Knowledge.
+- The old title was then removed from the visibility allow-list.
+
+Rehearsal (`br-damp-salad-apvnfvne`) matches production content.
 
 ## Rollout order
 
