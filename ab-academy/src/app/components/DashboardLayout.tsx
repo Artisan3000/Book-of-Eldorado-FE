@@ -51,7 +51,9 @@ export default function DashboardLayout({
 
       {/* Tabs (if provided) */}
       {tabs.length > 0 && (
-        <nav className="flex border-b border-black text-sm uppercase">
+        // Scrolls sideways on its own when the tabs are wider than a phone,
+        // instead of widening the whole page.
+        <nav className="flex overflow-x-auto border-b border-black text-sm uppercase">
           {tabs.map((tab) => {
             const isActive = activeTab?.toLowerCase() === tab.toLowerCase();
             const isDisabled = disabledTabSet.has(tab.toLowerCase());
@@ -66,7 +68,7 @@ export default function DashboardLayout({
                 }}
                 disabled={isDisabled}
                 aria-disabled={isDisabled}
-                className={`relative px-6 py-3 border-r border-black last:border-r-0 transition-colors duration-300 ${
+                className={`relative shrink-0 whitespace-nowrap px-4 py-3 sm:px-6 border-r border-black last:border-r-0 transition-colors duration-300 ${
                   isDisabled
                     ? "cursor-not-allowed bg-gray-100 text-gray-400"
                     : isActive

@@ -39,8 +39,8 @@ export default async function CourseDetailPage({
       </div>
 
       <Tabs
-        navClassName="flex gap-6 mb-8 border-b border-gray-300"
-        buttonClassName="pb-2 text-sm font-medium"
+        navClassName="flex gap-6 mb-8 overflow-x-auto border-b border-gray-300"
+        buttonClassName="shrink-0 whitespace-nowrap pb-2 text-sm font-medium"
         activeButtonClassName="border-b-2 border-black text-black"
         inactiveButtonClassName="text-gray-500 hover:text-black"
         activeIndicatorClassName="hidden"
