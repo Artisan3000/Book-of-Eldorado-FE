@@ -2,7 +2,11 @@
 
 import { CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import {
+  measureReadingPosition,
+  shouldAutoCompleteReading,
+} from "@/lib/lessons/reading-position";
 
 type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
 
@@ -10,6 +14,8 @@ type TextLessonProgressProps = {
   courseSlug: string;
   lessonSlug: string;
   progressStatus: LessonProgressStatus;
+  // The rendered lesson body. Scrolling its end into view completes reading.
+  bodyRef: RefObject<HTMLElement | null>;
   onProgressStatusChange: (progressStatus: LessonProgressStatus) => void;
 };
 
@@ -20,16 +26,20 @@ const statusRank: Record<LessonProgressStatus, number> = {
 };
 
 // Text lessons use the same progress API as Vimeo lessons, but only ever send
-// status updates: never playback positions.
+// status updates: never playback positions. Like a video finishing, scrolling
+// to the end of the body marks the lesson COMPLETED; the button is a fallback.
+// This is reading completion only, never workbook or practical sign-off.
 export default function TextLessonProgress({
   courseSlug,
   lessonSlug,
   progressStatus,
+  bodyRef,
   onProgressStatusChange,
 }: TextLessonProgressProps) {
   const router = useRouter();
   const hasMarkedStartedRef = useRef(false);
   const progressStatusRef = useRef<LessonProgressStatus>(progressStatus);
+  const isCompletingRef = useRef(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [progressError, setProgressError] = useState("");
 
@@ -92,7 +102,12 @@ export default function TextLessonProgress({
     });
   }, [saveProgress]);
 
-  const handleMarkComplete = async () => {
+  const completeLesson = useCallback(async () => {
+    if (isCompletingRef.current || progressStatusRef.current === "COMPLETED") {
+      return;
+    }
+
+    isCompletingRef.current = true;
     setIsCompleting(true);
     setProgressError("");
 
@@ -105,24 +120,84 @@ export default function TextLessonProgress({
         error instanceof Error ? error.message : "Progress could not be saved."
       );
     } finally {
+      isCompletingRef.current = false;
       setIsCompleting(false);
     }
-  };
+  }, [router, saveProgress]);
+
+  useEffect(() => {
+    const body = bodyRef.current;
+
+    if (!body) {
+      return;
+    }
+
+    // Stays false for a lesson whose end is already visible when it opens, so
+    // it never completes without the reader scrolling to the end.
+    let endWasBelowViewport = false;
+    let frame = 0;
+
+    const check = (isScroll: boolean) => {
+      const rect = body.getBoundingClientRect();
+      const { reachedEnd } = measureReadingPosition(
+        { top: rect.top, height: rect.height },
+        window.innerHeight
+      );
+
+      if (
+        shouldAutoCompleteReading({
+          reachedEnd,
+          endWasBelowViewport,
+          isScroll,
+          alreadyCompletedOrPending:
+            isCompletingRef.current || progressStatusRef.current === "COMPLETED",
+        })
+      ) {
+        void completeLesson();
+      }
+
+      if (!reachedEnd) {
+        endWasBelowViewport = true;
+      }
+    };
+    const handleScroll = () => {
+      if (frame) {
+        return;
+      }
+
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        check(true);
+      });
+    };
+    const handleResize = () => check(false);
+
+    check(false);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [bodyRef, completeLesson]);
 
   return (
     <div className="space-y-3 border border-black p-6">
       {progressStatus === "COMPLETED" ? (
-        <p className="inline-flex items-center gap-2 font-semibold">
+        <p role="status" className="inline-flex items-center gap-2 font-semibold">
           <CheckCircle2 className="h-5 w-5" /> Lesson completed
         </p>
       ) : (
         <>
           <p className="text-sm text-gray-700">
-            Finished reading? Mark this lesson complete to record your progress.
+            This lesson is marked complete when you reach the end. You can also
+            mark it complete yourself.
           </p>
           <button
             type="button"
-            onClick={handleMarkComplete}
+            onClick={completeLesson}
             disabled={isCompleting}
             className="inline-flex items-center gap-2 border border-black bg-black px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-60"
           >

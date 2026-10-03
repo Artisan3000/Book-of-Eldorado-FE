@@ -8,7 +8,7 @@ import {
   PlayCircle,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
 import { isPdfHref, type LessonContentKind } from "@/lib/lessons/lesson-content";
 import TextLessonProgress from "./TextLessonProgress";
@@ -80,6 +80,7 @@ export default function StudentLessonExperience({
   const handleDurationChange = useCallback((nextDurationLabel: string) => {
     setDurationLabel(nextDurationLabel);
   }, []);
+  const textBodyRef = useRef<HTMLElement>(null);
   const handleProgressStatusChange = useCallback(
     (nextProgressStatus: LessonProgressStatus) => {
       setProgressStatus(nextProgressStatus);
@@ -134,13 +135,14 @@ export default function StudentLessonExperience({
             />
           ) : lesson.contentKind === "text" ? (
             <>
-              <article className="border border-gray-300 p-6 md:p-10">
+              <article ref={textBodyRef} className="border border-gray-300 p-6 md:p-10">
                 {textContent}
               </article>
               <TextLessonProgress
                 courseSlug={slug}
                 lessonSlug={lessonSlug}
                 progressStatus={progressStatus}
+                bodyRef={textBodyRef}
                 onProgressStatusChange={handleProgressStatusChange}
               />
             </>
