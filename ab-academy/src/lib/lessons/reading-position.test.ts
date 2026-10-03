@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { measureReadingPosition, shouldAutoCompleteReading } from "./reading-position";
+import {
+  getRemainingReadingMinutes,
+  measureReadingPosition,
+  parseReadingMinutes,
+  shouldAutoCompleteReading,
+} from "./reading-position";
 
 const viewportHeight = 800;
 
@@ -56,4 +61,24 @@ test("reading completion is sent at most once", () => {
 
 test("not reaching the end never completes", () => {
   assert.equal(shouldAutoCompleteReading({ ...scrolledToEnd, reachedEnd: false }), false);
+});
+
+test("reading minutes come from the stored reading-time label", () => {
+  assert.equal(parseReadingMinutes("3 min read"), 3);
+  assert.equal(parseReadingMinutes("12 min read"), 12);
+  assert.equal(parseReadingMinutes("8-10 min"), null);
+  assert.equal(parseReadingMinutes(null), null);
+});
+
+test("time left counts down in whole minutes and disappears at the end", () => {
+  const at = (progress: number, reachedEnd = false) =>
+    getRemainingReadingMinutes(3, { progress, reachedEnd });
+
+  assert.equal(at(0), null);
+  assert.equal(at(0.2), null);
+  assert.equal(at(0.4), 2);
+  assert.equal(at(0.7), 1);
+  assert.equal(at(0.99), 1);
+  assert.equal(at(1, true), null);
+  assert.equal(getRemainingReadingMinutes(null, { progress: 0.5, reachedEnd: false }), null);
 });

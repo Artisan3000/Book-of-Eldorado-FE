@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import {
   measureReadingPosition,
+  type ReadingPosition,
   shouldAutoCompleteReading,
 } from "@/lib/lessons/reading-position";
 
@@ -16,6 +17,9 @@ type TextLessonProgressProps = {
   progressStatus: LessonProgressStatus;
   // The rendered lesson body. Scrolling its end into view completes reading.
   bodyRef: RefObject<HTMLElement | null>;
+  // Reports the same measurement auto-complete uses, for the reading
+  // indicators. Reading position only; never lesson completion.
+  onReadingPositionChange: (position: ReadingPosition) => void;
   onProgressStatusChange: (progressStatus: LessonProgressStatus) => void;
 };
 
@@ -34,6 +38,7 @@ export default function TextLessonProgress({
   lessonSlug,
   progressStatus,
   bodyRef,
+  onReadingPositionChange,
   onProgressStatusChange,
 }: TextLessonProgressProps) {
   const router = useRouter();
@@ -139,10 +144,13 @@ export default function TextLessonProgress({
 
     const check = (isScroll: boolean) => {
       const rect = body.getBoundingClientRect();
-      const { reachedEnd } = measureReadingPosition(
+      const position = measureReadingPosition(
         { top: rect.top, height: rect.height },
         window.innerHeight
       );
+      const { reachedEnd } = position;
+
+      onReadingPositionChange(position);
 
       if (
         shouldAutoCompleteReading({
@@ -181,7 +189,7 @@ export default function TextLessonProgress({
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleResize);
     };
-  }, [bodyRef, completeLesson]);
+  }, [bodyRef, completeLesson, onReadingPositionChange]);
 
   return (
     <div className="space-y-3 border border-black p-6">

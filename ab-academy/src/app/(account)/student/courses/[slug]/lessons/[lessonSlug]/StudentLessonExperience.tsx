@@ -11,6 +11,12 @@ import Link from "next/link";
 import { useCallback, useRef, useState, type ReactNode } from "react";
 import VimeoPlayer from "@/app/components/VimeoPlayer";
 import { isPdfHref, type LessonContentKind } from "@/lib/lessons/lesson-content";
+import {
+  getRemainingReadingMinutes,
+  parseReadingMinutes,
+  type ReadingPosition,
+} from "@/lib/lessons/reading-position";
+import ReadingPositionEdge from "./ReadingPositionEdge";
 import TextLessonProgress from "./TextLessonProgress";
 
 type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
@@ -81,6 +87,24 @@ export default function StudentLessonExperience({
     setDurationLabel(nextDurationLabel);
   }, []);
   const textBodyRef = useRef<HTMLElement>(null);
+  const [readingPosition, setReadingPosition] = useState<ReadingPosition>({
+    progress: 0,
+    reachedEnd: false,
+  });
+  // Rounded so scrolling re-renders only when the indicator would visibly move.
+  const handleReadingPositionChange = useCallback((next: ReadingPosition) => {
+    const progress = Math.round(next.progress * 500) / 500;
+
+    setReadingPosition((current) =>
+      current.progress === progress && current.reachedEnd === next.reachedEnd
+        ? current
+        : { progress, reachedEnd: next.reachedEnd }
+    );
+  }, []);
+  const remainingMinutes =
+    lesson.contentKind === "text"
+      ? getRemainingReadingMinutes(parseReadingMinutes(lesson.duration), readingPosition)
+      : null;
   const handleProgressStatusChange = useCallback(
     (nextProgressStatus: LessonProgressStatus) => {
       setProgressStatus(nextProgressStatus);
@@ -112,6 +136,12 @@ export default function StudentLessonExperience({
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock className="w-4 h-4" /> {durationLabel}
+            {remainingMinutes !== null && (
+              // Changes while scrolling, so kept out of the accessibility tree.
+              <span aria-hidden="true" className="text-gray-500">
+                · about {remainingMinutes} min left
+              </span>
+            )}
           </span>
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="w-4 h-4" />
@@ -138,11 +168,13 @@ export default function StudentLessonExperience({
               <article ref={textBodyRef} className="border border-gray-300 p-6 md:p-10">
                 {textContent}
               </article>
+              <ReadingPositionEdge progress={readingPosition.progress} />
               <TextLessonProgress
                 courseSlug={slug}
                 lessonSlug={lessonSlug}
                 progressStatus={progressStatus}
                 bodyRef={textBodyRef}
+                onReadingPositionChange={handleReadingPositionChange}
                 onProgressStatusChange={handleProgressStatusChange}
               />
             </>

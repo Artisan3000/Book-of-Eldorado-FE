@@ -29,6 +29,27 @@ export function measureReadingPosition(
   return { progress, reachedEnd };
 }
 
+// "8 min read" -> 8. Null when the label carries no reading time.
+export function parseReadingMinutes(durationLabel: string | null | undefined) {
+  const match = durationLabel?.match(/^(\d+) min read$/);
+  return match ? Number(match[1]) : null;
+}
+
+// Whole minutes left at this reading position, or null when there is nothing
+// worth showing: while it would still equal the full reading time, and once
+// the end of the body is in view.
+export function getRemainingReadingMinutes(
+  totalMinutes: number | null,
+  { progress, reachedEnd }: ReadingPosition
+) {
+  if (!totalMinutes || reachedEnd) {
+    return null;
+  }
+
+  const remaining = Math.max(1, Math.ceil(totalMinutes * (1 - progress)));
+  return remaining < totalMinutes ? remaining : null;
+}
+
 // Reading completes only when the reader scrolls the end of the body into
 // view. A lesson whose end was already visible when it opened never
 // auto-completes (the reader uses "Mark lesson complete" instead), and a
