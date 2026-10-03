@@ -15,7 +15,7 @@ export default async function StudentLessonPage({
     await getStudentLessonDetail(user.id, slug, lessonSlug);
 
   return (
-    <section className="px-8 py-8 animate-fadeIn md:px-16">
+    <section className="page-gutter py-8 animate-fadeIn md:px-16">
       <StudentLessonExperience
         key={lesson.id}
         course={course}

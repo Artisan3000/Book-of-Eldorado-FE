@@ -25,7 +25,7 @@ Text lessons use the existing `POST /api/student/courses/[slug]/lessons/[lessonS
 - Opening a `NOT_STARTED` lesson sends `{ "status": "IN_PROGRESS" }` once.
 - Scrolling the end of the lesson body into view sends `{ "status": "COMPLETED" }`, the way a Vimeo lesson completes when playback ends. The measurement lives in `src/lib/lessons/reading-position.ts`. A lesson whose end is already visible when it opens never auto-completes, and completion is sent at most once.
 - **Mark lesson complete** is the fallback and sends the same request.
-- The same measurement drives two reading-position indicators, which are hidden from screen readers and have no completion meaning: a 2px hairline across the top of the viewport, and "· about N min left" after the stored reading time in the lesson details, which disappears once the end is in view.
+- The same measurement drives the reading-position indicator (`ReadingPositionIndicator`), which is hidden from screen readers and has no completion meaning: a 2px hairline across the top of the viewport, plus a small fixed "N min left" tag under its right end while the reader is inside the body, gone once the end is in view. The lesson details keep the stored reading time.
 - Either way, server data is refreshed so course progress updates.
 - The route never downgrades a completed lesson, and the client ignores late responses that would move status backwards.
 - Text lessons never send `SAVE_POSITION`; `lastPositionSeconds` stays `0`.

@@ -10,6 +10,8 @@ export type ReadingPosition = {
   // 0 when the body's top is at the bottom of the viewport, 1 once its end is in view.
   progress: number;
   reachedEnd: boolean;
+  // The body's top has scrolled to the top of the viewport: the reader is in the lesson.
+  startedBody: boolean;
 };
 
 export function measureReadingPosition(
@@ -17,7 +19,7 @@ export function measureReadingPosition(
   viewportHeight: number
 ): ReadingPosition {
   if (body.height <= 0 || viewportHeight <= 0) {
-    return { progress: 0, reachedEnd: false };
+    return { progress: 0, reachedEnd: false, startedBody: false };
   }
 
   const bottom = body.top + body.height;
@@ -26,7 +28,7 @@ export function measureReadingPosition(
     ? 1
     : Math.min(1, Math.max(0, (viewportHeight - body.top) / body.height));
 
-  return { progress, reachedEnd };
+  return { progress, reachedEnd, startedBody: body.top <= 0 };
 }
 
 // "8 min read" -> 8. Null when the label carries no reading time.
@@ -35,19 +37,17 @@ export function parseReadingMinutes(durationLabel: string | null | undefined) {
   return match ? Number(match[1]) : null;
 }
 
-// Whole minutes left at this reading position, or null when there is nothing
-// worth showing: while it would still equal the full reading time, and once
-// the end of the body is in view.
+// Whole minutes left at this reading position while the reader is inside the
+// body, or null before they reach it and once its end is in view.
 export function getRemainingReadingMinutes(
   totalMinutes: number | null,
-  { progress, reachedEnd }: ReadingPosition
+  { progress, reachedEnd, startedBody }: ReadingPosition
 ) {
-  if (!totalMinutes || reachedEnd) {
+  if (!totalMinutes || reachedEnd || !startedBody) {
     return null;
   }
 
-  const remaining = Math.max(1, Math.ceil(totalMinutes * (1 - progress)));
-  return remaining < totalMinutes ? remaining : null;
+  return Math.max(1, Math.ceil(totalMinutes * (1 - progress)));
 }
 
 // Reading completes only when the reader scrolls the end of the body into

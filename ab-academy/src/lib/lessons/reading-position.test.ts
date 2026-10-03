@@ -13,14 +13,17 @@ test("reading position runs from 0 to 1 as the body scrolls through the viewport
   assert.deepEqual(measureReadingPosition({ top: 800, height: 2000 }, viewportHeight), {
     progress: 0,
     reachedEnd: false,
+    startedBody: false,
   });
   assert.deepEqual(measureReadingPosition({ top: -200, height: 2000 }, viewportHeight), {
     progress: 0.5,
     reachedEnd: false,
+    startedBody: true,
   });
   assert.deepEqual(measureReadingPosition({ top: -1200, height: 2000 }, viewportHeight), {
     progress: 1,
     reachedEnd: true,
+    startedBody: true,
   });
 });
 
@@ -33,6 +36,7 @@ test("an unmeasured body never reports reading progress", () => {
   assert.deepEqual(measureReadingPosition({ top: 0, height: 0 }, viewportHeight), {
     progress: 0,
     reachedEnd: false,
+    startedBody: false,
   });
 });
 
@@ -70,15 +74,18 @@ test("reading minutes come from the stored reading-time label", () => {
   assert.equal(parseReadingMinutes(null), null);
 });
 
-test("time left counts down in whole minutes and disappears at the end", () => {
-  const at = (progress: number, reachedEnd = false) =>
-    getRemainingReadingMinutes(3, { progress, reachedEnd });
+test("time left counts down in whole minutes only while the reader is inside the body", () => {
+  const at = (progress: number, startedBody = true, reachedEnd = false) =>
+    getRemainingReadingMinutes(3, { progress, reachedEnd, startedBody });
 
-  assert.equal(at(0), null);
-  assert.equal(at(0.2), null);
+  assert.equal(at(0.2, false), null);
+  assert.equal(at(0.2), 3);
   assert.equal(at(0.4), 2);
   assert.equal(at(0.7), 1);
   assert.equal(at(0.99), 1);
-  assert.equal(at(1, true), null);
-  assert.equal(getRemainingReadingMinutes(null, { progress: 0.5, reachedEnd: false }), null);
+  assert.equal(at(1, true, true), null);
+  assert.equal(
+    getRemainingReadingMinutes(null, { progress: 0.5, reachedEnd: false, startedBody: true }),
+    null
+  );
 });

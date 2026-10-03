@@ -16,7 +16,7 @@ import {
   parseReadingMinutes,
   type ReadingPosition,
 } from "@/lib/lessons/reading-position";
-import ReadingPositionEdge from "./ReadingPositionEdge";
+import ReadingPositionIndicator from "./ReadingPositionIndicator";
 import TextLessonProgress from "./TextLessonProgress";
 
 type LessonProgressStatus = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED";
@@ -90,15 +90,18 @@ export default function StudentLessonExperience({
   const [readingPosition, setReadingPosition] = useState<ReadingPosition>({
     progress: 0,
     reachedEnd: false,
+    startedBody: false,
   });
   // Rounded so scrolling re-renders only when the indicator would visibly move.
   const handleReadingPositionChange = useCallback((next: ReadingPosition) => {
     const progress = Math.round(next.progress * 500) / 500;
 
     setReadingPosition((current) =>
-      current.progress === progress && current.reachedEnd === next.reachedEnd
+      current.progress === progress &&
+      current.reachedEnd === next.reachedEnd &&
+      current.startedBody === next.startedBody
         ? current
-        : { progress, reachedEnd: next.reachedEnd }
+        : { ...next, progress }
     );
   }, []);
   const remainingMinutes =
@@ -136,12 +139,6 @@ export default function StudentLessonExperience({
           </span>
           <span className="inline-flex items-center gap-1">
             <Clock className="w-4 h-4" /> {durationLabel}
-            {remainingMinutes !== null && (
-              // Changes while scrolling, so kept out of the accessibility tree.
-              <span aria-hidden="true" className="text-gray-500">
-                · about {remainingMinutes} min left
-              </span>
-            )}
           </span>
           <span className="inline-flex items-center gap-1">
             <CheckCircle2 className="w-4 h-4" />
@@ -168,7 +165,10 @@ export default function StudentLessonExperience({
               <article ref={textBodyRef} className="border border-gray-300 p-6 md:p-10">
                 {textContent}
               </article>
-              <ReadingPositionEdge progress={readingPosition.progress} />
+              <ReadingPositionIndicator
+                progress={readingPosition.progress}
+                remainingMinutes={remainingMinutes}
+              />
               <TextLessonProgress
                 courseSlug={slug}
                 lessonSlug={lessonSlug}
