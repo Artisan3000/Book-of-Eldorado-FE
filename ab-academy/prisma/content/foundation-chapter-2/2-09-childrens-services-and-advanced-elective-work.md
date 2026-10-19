@@ -12,6 +12,8 @@ Your first job is not to force the appointment to behave like an adult service.
 
 Your first job is to create a safe, patient experience.
 
+![Children’s haircut comfort sequence showing communication, movement-aware technique, safety checks, supervision, and gentle finishing](/lesson-diagrams/chapter-2-lesson-2-9-childrens-haircut-comfort-guide.png)
+
 ## Talk to both people in front of you
 
 Speak to the child directly. Explain the tool before you use it. Let them know what is happening next.

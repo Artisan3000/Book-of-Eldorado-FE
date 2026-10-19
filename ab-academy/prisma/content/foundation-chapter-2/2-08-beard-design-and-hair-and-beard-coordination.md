@@ -12,6 +12,8 @@ This lesson covers classic, traditional, mid-length, all-scissor, tapered, and s
 
 The best combination services feel coordinated from the sideburn through the beard line. Haircut, beard, and outline should read as one decision.
 
+![Unified hair-and-beard silhouette showing face shape, beard mass, sideburn transition, cheek and neck guidelines, and believable outline checks](/lesson-diagrams/chapter-2-lesson-2-8-hair-and-beard-guide.png)
+
 ## Confirm the length before you remove it
 
 Beards carry history. Clients often have more attachment to that length than they realize until it is gone.

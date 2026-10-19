@@ -6,6 +6,8 @@ By the end of this lesson, you should be able to build a scissor-only shape with
 
 When the clipper disappears, your shape has to come from sectioning, guides, elevation, overdirection, graduation, layering, and perimeter control.
 
+![Scissor-only sectioning, stationary and traveling guides, elevation, overdirection, graduation, layering, growth, and perimeter control](/lesson-diagrams/chapter-2-lesson-2-7-scissor-only-technique.png)
+
 That gives you more freedom, but it also gives you more ways to lose the plan.
 
 This lesson covers short, medium, and long all-scissor cuts, all-scissor top blends, and textured scissor-cut sides.

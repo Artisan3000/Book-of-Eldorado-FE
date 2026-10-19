@@ -12,6 +12,8 @@ That is why you choose fade height according to the client in front of you, not 
 
 This lesson covers the zero-degree skin fade, low skin fade, mid skin fade, high skin fade, and skin fade with a side part.
 
+![Skin-fade height, removable guideline logic, parietal ridge protection, and silhouette checks across multiple views](/lesson-diagrams/chapter-2-lesson-2-4-skin-fade-blueprint.png)
+
 ## Build guidelines you can actually remove
 
 A guideline is useful only if it gives you structure without creating a problem you cannot clean out later.

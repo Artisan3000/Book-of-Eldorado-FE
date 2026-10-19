@@ -14,6 +14,8 @@ That means looking at more than the reference photo. More than the haircut name.
 
 You need to read what’s actually in the chair.
 
+![Consultation workflow from reading the client and head shape through haircut planning, product choice, finish, maintenance, and building a client book](/lesson-diagrams/chapter-2-lesson-2-1-consultation-workflow.png)
+
 ## Read the head before you choose the cut
 
 Before you start, take in the whole picture.

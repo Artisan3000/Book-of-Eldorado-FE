@@ -19,6 +19,8 @@ The client chooses the desired result. You lead the consultation, explain the pl
 
 The instructor is evaluating the whole service, not just the cleanest detail in the finished cut.
 
+![Complete capstone service decision chain with consultation, execution, product, scorecard, product examination, graduation, and 30-day client-book planning](/lesson-diagrams/chapter-2-lesson-2-10-capstone-service-decision-chain.png)
+
 ## Use the Apprentice Scorecard
 
 Your capstone uses the same scorecard you have been building against throughout the chapter.

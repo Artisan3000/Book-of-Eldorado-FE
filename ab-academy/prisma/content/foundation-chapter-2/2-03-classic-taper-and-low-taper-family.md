@@ -12,6 +12,8 @@ The difference is not just how short you go. It is where the transition happens,
 
 That is why the first guideline matters. If the first decision is careless, every decision after it becomes harder.
 
+![Taper-family transition locations, preserved weight, first guideline, and full-silhouette checks](/lesson-diagrams/chapter-2-lesson-2-3-taper-fade-poster.png)
+
 ## Control the first guideline
 
 Set the first guideline with intention. Then work gradually.

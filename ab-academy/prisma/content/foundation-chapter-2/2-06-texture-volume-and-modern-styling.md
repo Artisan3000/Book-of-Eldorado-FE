@@ -12,6 +12,8 @@ What texture is not: taking weight out everywhere because the haircut feels heav
 
 That is how holes happen.
 
+![Purposeful texture removal, hair-type comparisons, drying direction, product sequence, and volume without stiffness](/lesson-diagrams/chapter-2-lesson-2-6-texture-volume-guide.png)
+
 ## Know what you are protecting
 
 This lesson covers textured tops, front French crops, textured pompadours, curly-cut tops, and classic beach-cut tops.

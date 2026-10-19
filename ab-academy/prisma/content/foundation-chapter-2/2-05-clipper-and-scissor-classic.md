@@ -22,6 +22,8 @@ But the important decision underneath all of that is simple: what needs to conne
 
 Connection creates one kind of movement. Intentional disconnection creates another. Neither is automatically better. The choice has to support the haircut.
 
+![Connected and intentionally disconnected top-and-side shapes with sectioning, scissor-over-comb, guide, graduation, weight control, and home-styling checks](/lesson-diagrams/chapter-2-lesson-2-5-connected-disconnected-haircut.png)
+
 ## Cut for the way the client will wear it
 
 Do not build a haircut that only works for the three minutes after you blow-dry and style it yourself.

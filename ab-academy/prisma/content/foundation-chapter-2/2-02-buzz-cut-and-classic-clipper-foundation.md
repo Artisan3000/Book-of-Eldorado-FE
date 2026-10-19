@@ -14,6 +14,8 @@ This lesson covers the buzz cut, the classic clipper cut, an all-clipper side gr
 
 The goal is not speed. The goal is consistency.
 
+![Guard results, clipper direction, crown growth patterns, grain checks, and natural versus sharpened hairline and neckline finishes](/lesson-diagrams/chapter-2-lesson-2-2-clipper-foundation.png)
+
 ## The guard is a decision, not the haircut
 
 Choosing a guard is the beginning of the plan, not the whole plan.
