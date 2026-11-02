@@ -22,6 +22,7 @@ enum AuthEventType {
   LOGIN_THROTTLED
   LOGOUT
   PASSWORD_CHANGED
+  PASSWORD_RESET
   AUTHORIZATION_CODE_ISSUED
   AUTHORIZATION_CODE_EXCHANGED
   AUTHORIZATION_EXCHANGE_REJECTED
@@ -63,6 +64,7 @@ model User {
   enrollments Enrollment[]
   authEvents  AuthEvent[]
   authorizationCodes AuthorizationCode[]
+  passwordResetTokens PasswordResetToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,6 +128,19 @@ model Session {
 
   @@index([userId])
   @@index([expiresAt])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([expiresAt, usedAt])
 }
 
 model Course {

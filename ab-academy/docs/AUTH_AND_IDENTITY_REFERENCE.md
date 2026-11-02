@@ -14,7 +14,10 @@
 - The raw token is held in the `aba_session` cookie: HTTP-only, host-only, `SameSite=Lax`, secure in production, 30-day lifetime.
 - Server code validates the database session, expiration, active user, and role.
 - Account/IP login throttling and auth audit events are stored in PostgreSQL.
-- Accounts are administratively provisioned; public registration, social login, password reset, and MFA are not implemented.
+- Accounts are administratively provisioned; public registration, social login, and MFA are not implemented.
+- Password recovery is available at `/forgot-password`. Requests always return the same response whether the email exists. Reset tokens are random, stored only as SHA-256 hashes, expire after 30 minutes, and are single-use.
+- Resetting a password revokes all existing Academy sessions and requires a fresh login. It preserves the user's role, active status, enrollments, and SSO eligibility.
+- Forgot-password email delivery requires `RESEND_API_KEY` and `ACADEMY_EMAIL_FROM` in the deployment environment. The provider request never logs the reset token.
 
 ## Deferred Artisan Integration Model
 

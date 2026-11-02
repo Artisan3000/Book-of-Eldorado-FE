@@ -104,6 +104,11 @@ export default function LoginPage() {
       <p className="text-sm text-gray-600 text-center mt-6">
         Accounts are provided by an Academy administrator.
       </p>
+      <p className="text-sm text-center mt-3">
+        <a href="/forgot-password" className="underline hover:no-underline">
+          Forgot password?
+        </a>
+      </p>
     </main>
   );
 }
