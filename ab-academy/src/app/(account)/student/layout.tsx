@@ -1,6 +1,5 @@
-import { requireRole } from "@/lib/current-user";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { toAppUser } from "@/lib/user";
+import { requireStudentExperience } from "@/lib/view-mode";
 import StudentShell from "./StudentShell";
 
 export default async function StudentLayout({
@@ -8,7 +7,11 @@ export default async function StudentLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
+  const { user, isPreview } = await requireStudentExperience();
 
-  return <StudentShell user={toAppUser(user)}>{children}</StudentShell>;
+  return (
+    <StudentShell user={toAppUser(user)} isPreview={isPreview}>
+      {children}
+    </StudentShell>
+  );
 }

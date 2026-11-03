@@ -3,13 +3,16 @@
 import { usePathname, useRouter } from "next/navigation";
 import DashboardLayout from "@/app/components/DashboardLayout";
 import type { AppUser } from "@/lib/user";
+import { canRenderViewSwitcher } from "@/lib/view-mode-policy";
 
 export default function StudentShell({
   children,
   user,
+  isPreview,
 }: {
   children: React.ReactNode;
   user: AppUser;
+  isPreview: boolean;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -42,6 +45,8 @@ export default function StudentShell({
       tabs={tabs}
       activeTab={activeTab}
       user={user}
+      viewMode="student"
+      canSwitchViews={isPreview && canRenderViewSwitcher(user.role)}
       onTabChange={(tab) => router.push(tabRoutes[tab])}
     >
       {children}

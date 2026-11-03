@@ -1,18 +1,19 @@
-import { requireRole } from "@/lib/current-user";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentLessonDetail } from "@/lib/data/student";
+import { getStudentPreviewLessonDetail } from "@/lib/data/student-preview";
 import LessonMarkdown from "@/app/components/LessonMarkdown";
 import StudentLessonExperience from "./StudentLessonExperience";
+import { requireStudentExperience } from "@/lib/view-mode";
 
 export default async function StudentLessonPage({
   params,
 }: {
   params: Promise<{ slug: string; lessonSlug: string }>;
 }) {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
+  const { user, isPreview } = await requireStudentExperience();
   const { slug, lessonSlug } = await params;
-  const { course, lesson, previousLesson, nextLesson } =
-    await getStudentLessonDetail(user.id, slug, lessonSlug);
+  const { course, lesson, previousLesson, nextLesson } = isPreview
+    ? await getStudentPreviewLessonDetail(slug, lessonSlug)
+    : await getStudentLessonDetail(user.id, slug, lessonSlug);
 
   return (
     <section className="page-gutter py-8 animate-fadeIn md:px-16">
@@ -43,6 +44,7 @@ export default async function StudentLessonPage({
           previousLesson && { href: previousLesson.href, title: previousLesson.title }
         }
         nextLesson={nextLesson && { href: nextLesson.href, title: nextLesson.title }}
+        readOnly={isPreview}
       />
     </section>
   );

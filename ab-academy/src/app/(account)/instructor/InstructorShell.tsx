@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import DashboardLayout from "@/app/components/DashboardLayout";
 import type { AppUser } from "@/lib/user";
+import { canRenderViewSwitcher } from "@/lib/view-mode-policy";
 
 export default function InstructorShell({
   children,
@@ -45,6 +46,8 @@ export default function InstructorShell({
       tabs={tabs}
       activeTab={activeTab}
       user={user}
+      viewMode="instructor"
+      canSwitchViews={canRenderViewSwitcher(user.role)}
       onTabChange={(tab) => router.push(tabRoutes[tab])}
     >
       {children}

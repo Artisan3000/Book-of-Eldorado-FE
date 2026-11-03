@@ -1,19 +1,21 @@
 import { PlayCircle, FileText, MessageSquare } from "lucide-react";
 import Link from "next/link";
 import Tabs from "@/app/components/Tabs";
-import { requireRole } from "@/lib/current-user";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { getStudentCourseDetail } from "@/lib/data/student";
+import { getStudentPreviewCourseDetail } from "@/lib/data/student-preview";
 import { isPdfHref } from "@/lib/lessons/lesson-content";
+import { requireStudentExperience } from "@/lib/view-mode";
 
 export default async function CourseDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
+  const { user, isPreview } = await requireStudentExperience();
   const { slug } = await params;
-  const course = await getStudentCourseDetail(user.id, slug);
+  const course = isPreview
+    ? await getStudentPreviewCourseDetail(slug)
+    : await getStudentCourseDetail(user.id, slug);
 
   return (
     <section className="page-gutter py-8 animate-fadeIn md:px-16">

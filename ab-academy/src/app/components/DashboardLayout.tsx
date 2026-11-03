@@ -1,7 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { ReactNode, useState } from "react";
 import type { AppUser } from "@/lib/user";
+import type { ViewMode } from "@/lib/view-mode";
 
 interface DashboardLayoutProps {
   title: string;
@@ -12,6 +14,8 @@ interface DashboardLayoutProps {
   onTabChange?: (tab: string) => void;
   disabledTabs?: string[];
   user?: AppUser | null;
+  viewMode?: ViewMode;
+  canSwitchViews?: boolean;
 }
 
 export default function DashboardLayout({
@@ -23,13 +27,60 @@ export default function DashboardLayout({
   onTabChange,
   disabledTabs = [],
   user,
+  viewMode = "instructor",
+  canSwitchViews = false,
 }: DashboardLayoutProps) {
+  const router = useRouter();
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [switchError, setSwitchError] = useState("");
   const disabledTabSet = new Set(
     disabledTabs.map((tab) => tab.toLowerCase())
   );
 
   return (
     <div className="min-h-screen flex flex-col">
+      {canSwitchViews && (
+        <div className="fixed bottom-4 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-1 rounded-full border border-black bg-white p-1 text-xs uppercase shadow-lg sm:bottom-6">
+          {(["instructor", "student"] as const).map((mode) => {
+            const active = viewMode === mode;
+            return (
+              <button
+                key={mode}
+                type="button"
+                aria-pressed={active}
+                disabled={active || isSwitching}
+                onClick={async () => {
+                  setIsSwitching(true);
+                  setSwitchError("");
+                  try {
+                    const response = await fetch("/api/account/view-mode", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ mode }),
+                    });
+                    if (!response.ok) throw new Error("View switch unavailable.");
+                    router.push(mode === "student" ? "/student/dashboard" : "/instructor");
+                    router.refresh();
+                  } catch (error) {
+                    setSwitchError(
+                      error instanceof Error ? error.message : "View switch unavailable."
+                    );
+                    setIsSwitching(false);
+                  }
+                }}
+                className={`min-w-24 rounded-full px-3 py-2 font-semibold transition sm:min-w-28 ${
+                  active
+                    ? "bg-black text-white"
+                    : "text-black hover:bg-gray-100 disabled:cursor-wait disabled:opacity-60"
+                }`}
+              >
+                {mode === "instructor" ? "Instructor" : "Student"}
+              </button>
+            );
+          })}
+          {switchError && <span className="sr-only" role="alert">{switchError}</span>}
+        </div>
+      )}
       {/* Header */}
       <header className="border-b border-black page-gutter py-6 flex items-center justify-between">
         <div>

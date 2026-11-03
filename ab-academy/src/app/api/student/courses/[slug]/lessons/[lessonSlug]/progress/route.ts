@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { userHasRole } from "@/lib/auth";
 import { requireBrowserMutation } from "@/lib/auth/request-security";
 import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
+import { userHasRole } from "@/lib/auth";
 import {
   CourseStatus,
   EnrollmentStatus,
@@ -13,6 +13,7 @@ import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { getLessonSlug } from "@/lib/data/student";
 import { getCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
+import { isStudentPreviewRequest } from "@/lib/view-mode";
 
 const supportedStatuses = new Set<LessonProgressStatus>([
   LessonProgressStatus.IN_PROGRESS,
@@ -283,6 +284,13 @@ export async function POST(
 
   if (!userHasRole(user.role, STUDENT_EXPERIENCE_ROLES)) {
     return NextResponse.json({ error: "You are not allowed to update lesson progress." }, { status: 403 });
+  }
+
+  if (await isStudentPreviewRequest()) {
+    return NextResponse.json(
+      { error: "Student preview is read-only." },
+      { status: 403 }
+    );
   }
 
   const body = await request.json().catch(() => null);

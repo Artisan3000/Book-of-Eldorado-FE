@@ -20,6 +20,7 @@ type VimeoPlayerProps = {
   savedPositionSeconds: number;
   onDurationChange: (durationLabel: string) => void;
   onProgressStatusChange: (progressStatus: LessonProgressStatus) => void;
+  readOnly?: boolean;
 };
 
 const POSITION_SAVE_INTERVAL_MS = 15_000;
@@ -78,6 +79,7 @@ export default function VimeoPlayer({
   savedPositionSeconds,
   onDurationChange,
   onProgressStatusChange,
+  readOnly = false,
 }: VimeoPlayerProps) {
   const [containerElement, setContainerElement] = useState<HTMLDivElement | null>(
     null
@@ -157,6 +159,7 @@ export default function VimeoPlayer({
 
   const savePlaybackPosition = useCallback(
     async (reason: PositionSaveReason) => {
+      if (readOnly) return true;
       const requestLessonKey = activeLessonKeyRef.current;
       const positionSeconds = Math.floor(currentPositionSecondsRef.current);
       const shouldUpdateLastViewedAt = reason === "pause";
@@ -238,11 +241,13 @@ export default function VimeoPlayer({
       courseSlug,
       lessonSlug,
       setProgressErrorForActiveLesson,
+      readOnly,
     ]
   );
 
   const saveProgress = useCallback(
     async (status: Exclude<LessonProgressStatus, "NOT_STARTED">) => {
+      if (readOnly) return;
       const requestLessonKey = activeLessonKeyRef.current;
 
       if (isMountedRef.current) {
@@ -317,6 +322,7 @@ export default function VimeoPlayer({
       lessonSlug,
       onProgressStatusChange,
       setProgressErrorForActiveLesson,
+      readOnly,
     ]
   );
 
@@ -373,7 +379,7 @@ export default function VimeoPlayer({
         lessonKey,
         message: "",
       });
-      startCheckpointInterval();
+      if (!readOnly) startCheckpointInterval();
 
       if (
         hasMarkedStartedRef.current ||
@@ -383,7 +389,7 @@ export default function VimeoPlayer({
       }
 
       hasMarkedStartedRef.current = true;
-      void saveProgress("IN_PROGRESS");
+      if (!readOnly) void saveProgress("IN_PROGRESS");
     };
     const handlePause = () => {
       clearCheckpointInterval();
@@ -396,7 +402,7 @@ export default function VimeoPlayer({
         return;
       }
 
-      void savePlaybackPosition("pause");
+      if (!readOnly) void savePlaybackPosition("pause");
     };
     const handleEnded = () => {
       clearCheckpointInterval();
@@ -406,8 +412,10 @@ export default function VimeoPlayer({
       }
 
       void (async () => {
-        await savePlaybackPosition("ended");
-        await saveProgress("COMPLETED");
+        if (!readOnly) {
+          await savePlaybackPosition("ended");
+          await saveProgress("COMPLETED");
+        }
       })();
     };
 
@@ -477,7 +485,7 @@ export default function VimeoPlayer({
       isActive = false;
       clearCheckpointInterval();
       clearResumeMessageTimeout();
-      void savePlaybackPosition("unmount");
+      if (!readOnly) void savePlaybackPosition("unmount");
       player.off("timeupdate", handleTimeUpdate);
       player.off("play", handlePlay);
       player.off("pause", handlePause);
@@ -494,6 +502,7 @@ export default function VimeoPlayer({
     saveProgress,
     src,
     title,
+    readOnly,
   ]);
 
   return (

@@ -7,6 +7,7 @@ import { getVisibleCourseModules } from "@/lib/data/course-visibility";
 import { getCurrentUser } from "@/lib/current-user";
 import { prisma } from "@/lib/prisma";
 import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
+import { isStudentPreviewRequest } from "@/lib/view-mode";
 
 // Serves a course file (e.g. the Chapter 2 workbook PDF) to students enrolled
 // in that course. proxy.ts already redirects requests without a session
@@ -40,6 +41,40 @@ export async function GET(
       { error: "You are not allowed to download course resources." },
       { status: 403 }
     );
+  }
+
+  if (await isStudentPreviewRequest()) {
+    const previewCourse = await prisma.course.findFirst({
+      where: { slug, status: CourseStatus.PUBLISHED },
+      select: {
+        slug: true,
+        modules: {
+          select: { title: true, resourceUrl: true },
+        },
+      },
+    });
+
+    if (
+      !previewCourse ||
+      !moduleLinksToResource(
+        getVisibleCourseModules(previewCourse.slug, previewCourse.modules),
+        slug,
+        file
+      )
+    ) {
+      return NextResponse.json({ error: "Resource not found." }, { status: 404 });
+    }
+
+    const data = await readFile(resource.path);
+    return new NextResponse(new Uint8Array(data), {
+      headers: {
+        "Content-Type": resource.contentType,
+        "Content-Length": String(data.length),
+        "Content-Disposition": `inline; filename="${resource.downloadName}"`,
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   }
 
   const enrollment = await prisma.enrollment.findFirst({

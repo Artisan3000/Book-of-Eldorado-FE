@@ -5,12 +5,9 @@ import {
 import Link from "next/link";
 import MediaLibrary from "../../dashboard/components/MediaLibrary";
 import Mentorship from "../../dashboard/components/Mentorship";
-import { requireRole } from "@/lib/current-user";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
-import {
-  getStudentDashboardData,
-  type WeeklyLessonProgress,
-} from "@/lib/data/student";
+import { getStudentDashboardData, type WeeklyLessonProgress } from "@/lib/data/student";
+import { getStudentPreviewDashboardData } from "@/lib/data/student-preview";
+import { requireStudentExperience } from "@/lib/view-mode";
 
 function formatActivityDate(date: Date) {
   return new Intl.DateTimeFormat("en", {
@@ -20,10 +17,10 @@ function formatActivityDate(date: Date) {
 }
 
 export default async function StudentDashboardPage() {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
-  const { profile, courses, weeklyProgress } = await getStudentDashboardData(
-    user.id
-  );
+  const { user, isPreview } = await requireStudentExperience();
+  const { profile, courses, weeklyProgress } = isPreview
+    ? await getStudentPreviewDashboardData()
+    : await getStudentDashboardData(user.id);
 
   const stats = [
     {

@@ -53,6 +53,7 @@ type StudentLessonExperienceProps = {
   lessonSlug: string;
   previousLesson: LessonLink;
   nextLesson: LessonLink;
+  readOnly?: boolean;
 };
 
 function getLessonStatusLabel(status: LessonProgressStatus) {
@@ -75,6 +76,7 @@ export default function StudentLessonExperience({
   lessonSlug,
   previousLesson,
   nextLesson,
+  readOnly = false,
 }: StudentLessonExperienceProps) {
   const [progressStatus, setProgressStatus] =
     useState<LessonProgressStatus>(lesson.progressStatus);
@@ -159,6 +161,7 @@ export default function StudentLessonExperience({
               savedPositionSeconds={lesson.lastPositionSeconds}
               onDurationChange={handleDurationChange}
               onProgressStatusChange={handleProgressStatusChange}
+              readOnly={readOnly}
             />
           ) : lesson.contentKind === "text" ? (
             <>
@@ -169,14 +172,16 @@ export default function StudentLessonExperience({
                 progress={readingPosition.progress}
                 remainingMinutes={remainingMinutes}
               />
-              <TextLessonProgress
-                courseSlug={slug}
-                lessonSlug={lessonSlug}
-                progressStatus={progressStatus}
-                bodyRef={textBodyRef}
-                onReadingPositionChange={handleReadingPositionChange}
-                onProgressStatusChange={handleProgressStatusChange}
-              />
+              {!readOnly && (
+                <TextLessonProgress
+                  courseSlug={slug}
+                  lessonSlug={lessonSlug}
+                  progressStatus={progressStatus}
+                  bodyRef={textBodyRef}
+                  onReadingPositionChange={handleReadingPositionChange}
+                  onProgressStatusChange={handleProgressStatusChange}
+                />
+              )}
             </>
           ) : (
             <div className="flex aspect-video items-center justify-center border border-black bg-gray-50">

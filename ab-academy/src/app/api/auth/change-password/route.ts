@@ -7,6 +7,7 @@ import { getClientIp, requireBrowserMutation } from "@/lib/auth/request-security
 import { authJson } from "@/lib/auth/responses";
 import { prisma } from "@/lib/prisma";
 import { SESSION_COOKIE_NAME } from "@/lib/session-cookie";
+import { isStudentPreviewRequest } from "@/lib/view-mode";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -37,6 +38,10 @@ export async function POST(request: Request) {
     cookieStore.delete(SESSION_COOKIE_NAME);
 
     return authJson({ error: "You must be logged in." }, { status: 401 });
+  }
+
+  if (await isStudentPreviewRequest()) {
+    return authJson({ error: "Student preview is read-only." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

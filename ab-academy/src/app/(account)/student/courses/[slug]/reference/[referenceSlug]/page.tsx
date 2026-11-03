@@ -1,10 +1,10 @@
 import { ArrowLeft, BookOpen, FileText } from "lucide-react";
 import Link from "next/link";
 import LessonMarkdown from "@/app/components/LessonMarkdown";
-import { requireRole } from "@/lib/current-user";
 import { getStudentCourseReference } from "@/lib/data/student";
+import { getStudentPreviewCourseReference } from "@/lib/data/student-preview";
 import { isPdfHref } from "@/lib/lessons/lesson-content";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
+import { requireStudentExperience } from "@/lib/view-mode";
 
 // A read-only chapter reference (e.g. the Core Product Guide). Not a lesson:
 // no progress is recorded and it is not part of the lesson sequence.
@@ -13,13 +13,11 @@ export default async function CourseReferencePage({
 }: {
   params: Promise<{ slug: string; referenceSlug: string }>;
 }) {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
+  const { user, isPreview } = await requireStudentExperience();
   const { slug, referenceSlug } = await params;
-  const { course, module, reference, body } = await getStudentCourseReference(
-    user.id,
-    slug,
-    referenceSlug
-  );
+  const { course, module, reference, body } = isPreview
+    ? await getStudentPreviewCourseReference(slug, referenceSlug)
+    : await getStudentCourseReference(user.id, slug, referenceSlug);
   const printable = module.resource?.href ? module.resource : null;
 
   return (

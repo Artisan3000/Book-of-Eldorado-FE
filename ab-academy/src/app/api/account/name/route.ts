@@ -2,6 +2,7 @@ import { getCurrentUser } from "@/lib/current-user";
 import { requireBrowserMutation } from "@/lib/auth/request-security";
 import { authJson } from "@/lib/auth/responses";
 import { prisma } from "@/lib/prisma";
+import { isStudentPreviewRequest } from "@/lib/view-mode";
 
 const MAX_NAME_PART_LENGTH = 80;
 
@@ -17,6 +18,10 @@ export async function PATCH(request: Request) {
 
   if (!user) {
     return authJson({ error: "You must be logged in." }, { status: 401 });
+  }
+
+  if (await isStudentPreviewRequest()) {
+    return authJson({ error: "Student preview is read-only." }, { status: 403 });
   }
 
   const body = await request.json().catch(() => null);

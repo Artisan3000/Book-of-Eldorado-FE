@@ -1,10 +1,9 @@
 import AccountProfile from "@/app/(account)/components/AccountProfile";
-import { requireRole } from "@/lib/current-user";
-import { STUDENT_EXPERIENCE_ROLES } from "@/lib/roles";
 import { toAppUser } from "@/lib/user";
+import { requireStudentExperience } from "@/lib/view-mode";
 
 export default async function StudentProfile() {
-  const user = await requireRole(STUDENT_EXPERIENCE_ROLES);
+  const { user, isPreview } = await requireStudentExperience();
 
-  return <AccountProfile user={toAppUser(user)} />;
+  return <AccountProfile user={toAppUser(user)} readOnly={isPreview} />;
 }
