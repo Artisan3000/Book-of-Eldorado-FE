@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function NotFound() {
   return (
-    <main
+    <section
       aria-labelledby="not-found-title"
       className="min-h-[70vh] bg-[#fffff8] px-6 py-16 font-serif text-black sm:px-10 sm:py-24 lg:px-16"
     >
@@ -38,6 +38,6 @@ export default function NotFound() {
           </Link>
         </nav>
       </div>
-    </main>
+    </section>
   );
 }
