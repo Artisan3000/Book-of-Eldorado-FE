@@ -1,6 +1,6 @@
 import "server-only";
 
-import { absoluteUrl } from "@/lib/site-config";
+import { trustedAppUrl } from "@/lib/site-config";
 
 function requiredEmailConfig(name: string) {
   const value = process.env[name]?.trim();
@@ -11,7 +11,7 @@ function requiredEmailConfig(name: string) {
 export async function sendPasswordResetEmail(email: string, token: string) {
   const apiKey = requiredEmailConfig("RESEND_API_KEY");
   const from = requiredEmailConfig("ACADEMY_EMAIL_FROM");
-  const resetUrl = absoluteUrl(`/reset-password?token=${encodeURIComponent(token)}`);
+  const resetUrl = trustedAppUrl(`/reset-password?token=${encodeURIComponent(token)}`);
 
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
