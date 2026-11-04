@@ -13,6 +13,18 @@ function configuredOrigins() {
     if (normalized) origins.add(normalized);
   }
 
+  const configuredBaseUrl = process.env.ACADEMY_BASE_URL?.trim();
+  if (configuredBaseUrl) {
+    try {
+      const parsed = new URL(configuredBaseUrl);
+      if (parsed.pathname === "/" && !parsed.username && !parsed.password) {
+        origins.add(parsed.origin);
+      }
+    } catch {
+      // An invalid base URL must not expand the trusted-origin set.
+    }
+  }
+
   if (process.env.VERCEL_URL) {
     origins.add(`https://${process.env.VERCEL_URL}`);
   }

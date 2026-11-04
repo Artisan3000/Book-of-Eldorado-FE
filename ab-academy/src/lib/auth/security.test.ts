@@ -93,6 +93,34 @@ test("allows configured exact origins and rejects lookalikes", () => {
   }
 });
 
+test("trusts the explicit deployment base origin without trusting lookalikes", () => {
+  const originalBaseUrl = process.env.ACADEMY_BASE_URL;
+  process.env.ACADEMY_BASE_URL =
+    "https://academy-preview.example.com/";
+
+  try {
+    assert.equal(
+      isTrustedOrigin(
+        new Request("https://academy-preview.example.com/api/auth/reset-password", {
+          headers: { Origin: "https://academy-preview.example.com" },
+        }),
+      ),
+      true,
+    );
+    assert.equal(
+      isTrustedOrigin(
+        new Request("https://academy-preview.example.com/api/auth/reset-password", {
+          headers: { Origin: "https://academy-preview.example.com.evil.test" },
+        }),
+      ),
+      false,
+    );
+  } finally {
+    if (originalBaseUrl === undefined) delete process.env.ACADEMY_BASE_URL;
+    else process.env.ACADEMY_BASE_URL = originalBaseUrl;
+  }
+});
+
 test("HMAC identifiers are deterministic and domain separated", () => {
   const secret = "a-secure-test-secret-that-is-at-least-32-bytes";
   const accountHash = createIdentifierHash(
